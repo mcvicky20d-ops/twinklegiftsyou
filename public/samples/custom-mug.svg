@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Line illustration of a customised mug">
+  <defs>
+    <linearGradient id="cm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6e7e4"/><stop offset="1" stop-color="#fdfaf5"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#cm)"/>
+  <g fill="none" stroke="#23201d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+    <path d="M230 250h300v270c0 44-36 80-80 80H310c-44 0-80-36-80-80z"/>
+    <path d="M530 310h56c40 0 72 32 72 72s-32 72-72 72h-56"/>
+    <path d="M212 250h336"/>
+  </g>
+  <g fill="none" stroke="#b4614f" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M380 400c-18-24-58-20-58 14 0 30 40 54 58 70 18-16 58-40 58-70 0-34-40-38-58-14z"/>
+  </g>
+  <g stroke="#c9a227" stroke-width="5" stroke-linecap="round" opacity="0.55">
+    <path d="M300 640h160"/>
+  </g>
+  <g fill="none" stroke="#b4614f" stroke-width="5" stroke-linecap="round" opacity="0.45">
+    <path d="M300 190c0-26 22-26 22-52M370 190c0-26 22-26 22-52M440 190c0-26 22-26 22-52"/>
+  </g>
+</svg>

@@ -12,18 +12,21 @@ const categories = [
     name: "Pencil Art",
     slug: "pencil-art",
     description: "Hand-drawn graphite portraits from your photographs.",
+    image: "/samples/pencil-portrait.svg",
     sortOrder: 1,
   },
   {
     name: "Customised Mugs",
     slug: "customised-mugs",
     description: "Ceramic mugs printed with names, photos and inside jokes.",
+    image: "/samples/custom-mug.svg",
     sortOrder: 2,
   },
   {
     name: "Photo Frames",
     slug: "photo-frames",
     description: "Wooden and acrylic frames built around your favourite moment.",
+    image: "/samples/photo-frame.svg",
     sortOrder: 3,
   },
 ];
@@ -33,6 +36,7 @@ const products = [
     categorySlug: "pencil-art",
     title: "Single Portrait Pencil Sketch — A4",
     slug: "single-portrait-pencil-sketch-a4",
+    images: ["/samples/pencil-portrait.svg"],
     description:
       "A hand-drawn graphite portrait of one person on 300gsm acid-free paper, A4 size.\n\nSend us a clear, well-lit photograph and we will sketch it by hand. Takes 5–7 working days. Ships rolled in a hard tube, or add a frame at checkout.",
     price: 129900,
@@ -45,6 +49,7 @@ const products = [
     categorySlug: "pencil-art",
     title: "Couple Portrait Pencil Sketch — A3",
     slug: "couple-portrait-pencil-sketch-a3",
+    images: ["/samples/pencil-portrait.svg"],
     description:
       "Two people, one sketch, A3 size. Perfect for anniversaries and weddings.\n\nDrawn entirely by hand over roughly a week. You approve a photo of the finished drawing before it is packed and shipped.",
     price: 249900,
@@ -57,6 +62,7 @@ const products = [
     categorySlug: "customised-mugs",
     title: "Personalised Photo Mug — 330ml",
     slug: "personalised-photo-mug-330ml",
+    images: ["/samples/custom-mug.svg"],
     description:
       "A glossy white ceramic mug printed with your photo and message. Dishwasher-safe print, 330ml capacity.\n\nDispatched in 3–4 working days in a padded box.",
     price: 39900,
@@ -69,6 +75,7 @@ const products = [
     categorySlug: "customised-mugs",
     title: "Magic Colour-Changing Mug",
     slug: "magic-colour-changing-mug",
+    images: ["/samples/custom-mug.svg"],
     description:
       "Black on the outside until hot coffee reveals your photo. Always a good reaction.\n\nHand wash recommended to keep the effect crisp.",
     price: 54900,
@@ -80,6 +87,7 @@ const products = [
     categorySlug: "photo-frames",
     title: "Engraved Wooden Photo Frame — 8×10",
     slug: "engraved-wooden-photo-frame-8x10",
+    images: ["/samples/photo-frame.svg"],
     description:
       "Solid wood frame with your photo and a laser-engraved name or date on the base.\n\nComes ready to stand or hang, packed in a gift box.",
     price: 89900,
@@ -92,6 +100,7 @@ const products = [
     categorySlug: "photo-frames",
     title: "Collage Photo Frame — 6 Photos",
     slug: "collage-photo-frame-6-photos",
+    images: ["/samples/photo-frame.svg"],
     description:
       "Six of your favourite photographs arranged in one frame — a year, a trip or a friendship in a single piece.",
     price: 119900,
@@ -102,10 +111,10 @@ const products = [
 ];
 
 const gallery = [
-  { title: "Grandmother, from a 1974 photo", tag: "Pencil Art", caption: "Graphite on 300gsm paper, A3" },
-  { title: "Wedding portrait", tag: "Pencil Art", caption: "Commissioned for a first anniversary" },
-  { title: "Anniversary mug pair", tag: "Customised Mugs", caption: "Matching mugs with a shared date" },
-  { title: "Engraved teak frame", tag: "Photo Frames", caption: "Laser-engraved names on the base" },
+  { title: "Grandmother, from a 1974 photo", tag: "Pencil Art", caption: "Graphite on 300gsm paper, A3", image: "/samples/pencil-portrait.svg" },
+  { title: "Wedding portrait", tag: "Pencil Art", caption: "Commissioned for a first anniversary", image: "/samples/pencil-portrait.svg" },
+  { title: "Anniversary mug pair", tag: "Customised Mugs", caption: "Matching mugs with a shared date", image: "/samples/custom-mug.svg" },
+  { title: "Engraved teak frame", tag: "Photo Frames", caption: "Laser-engraved names on the base", image: "/samples/photo-frame.svg" },
 ];
 
 async function main() {
@@ -147,8 +156,9 @@ async function main() {
     await prisma.galleryItem.createMany({
       data: gallery.map((item, index) => ({
         ...item,
-        // Placeholder art so the page has something to show before real photos are uploaded.
-        imageUrl: `https://placehold.co/900x1100/f6e7e4/b4614f?text=${encodeURIComponent(item.tag)}`,
+        // Local placeholder art, so the gallery never depends on a third-party
+        // image host being reachable.
+        imageUrl: item.image,
         sortOrder: index,
       })),
     });

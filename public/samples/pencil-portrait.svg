@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Line illustration of a pencil portrait on paper">
+  <defs>
+    <linearGradient id="pp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fdfaf5"/><stop offset="1" stop-color="#f6e7e4"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="800" fill="url(#pp)"/>
+
+  <!-- sheet of paper -->
+  <g fill="#fffdfa" stroke="#23201d" stroke-width="7" stroke-linejoin="round" opacity="0.9">
+    <rect x="206" y="130" width="388" height="480" rx="10"/>
+  </g>
+
+  <!-- portrait: three-quarter bust, drawn as one continuous contour -->
+  <g fill="none" stroke="#b4614f" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M400 232c50 0 84 38 84 92 0 56-36 100-84 100s-84-44-84-100c0-54 34-92 84-92z"/>
+    <path d="M300 560c10-70 48-108 100-108s90 38 100 108"/>
+  </g>
+  <g fill="none" stroke="#b4614f" stroke-width="6" stroke-linecap="round" opacity="0.75">
+    <path d="M362 318c8-7 20-7 28 0"/>
+    <path d="M410 318c8-7 20-7 28 0"/>
+    <path d="M400 340v26c0 6-5 11-11 11h-6"/>
+    <path d="M374 400c16 10 36 10 52 0"/>
+  </g>
+
+  <!-- pencil resting beside the sheet, clear of the drawing -->
+  <g fill="none" stroke="#23201d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6">
+    <path d="M630 236l44 44-282 282-58 14 14-58z"/>
+    <path d="M630 236l44 44"/>
+    <path d="M348 576l14-58 44 44z"/>
+  </g>
+</svg>

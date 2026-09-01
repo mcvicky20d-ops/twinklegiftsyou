@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AtSign, Mail, Phone } from "lucide-react";
-import { navigation, site } from "@/lib/site";
+import { footerLinks, site } from "@/lib/site";
 
 export function Footer() {
   return (
@@ -15,10 +15,10 @@ export function Footer() {
 
         <div>
           <p className="text-sm font-semibold">Explore</p>
-          <ul className="mt-3 space-y-2 text-sm text-muted">
-            {navigation.map((item) => (
+          <ul className="mt-2 text-sm text-muted">
+            {footerLinks.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="hover:text-brand">
+                <Link href={item.href} className="inline-block py-1 hover:text-brand">
                   {item.label}
                 </Link>
               </li>
@@ -28,22 +28,22 @@ export function Footer() {
 
         <div>
           <p className="text-sm font-semibold">Reach us</p>
-          <ul className="mt-3 space-y-2 text-sm text-muted">
+          <ul className="mt-2 text-sm text-muted">
             <li className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              <a href={`mailto:${site.email}`} className="hover:text-brand">
+              <a href={`mailto:${site.email}`} className="inline-block py-1 hover:text-brand">
                 {site.email}
               </a>
             </li>
             <li className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="hover:text-brand">
+              <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="inline-block py-1 hover:text-brand">
                 {site.phone}
               </a>
             </li>
             <li className="flex items-center gap-2">
               <AtSign className="h-4 w-4" />
-              <a href={site.instagram} className="hover:text-brand">
+              <a href={site.instagram} className="inline-block py-1 hover:text-brand">
                 @twinklegiftsyou
               </a>
             </li>

@@ -40,3 +40,6 @@ export const navigation = [
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;
+
+/** Footer carries the extra pages the header has no room for on a phone. */
+export const footerLinks = [...navigation, { href: "/faq", label: "FAQ" }] as const;

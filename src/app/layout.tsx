@@ -5,11 +5,23 @@ import { siteUrl } from "@/lib/site-url";
 import { absolute, jsonLdGraph, organizationSchema, webSiteSchema } from "@/lib/seo";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+// Only the weights the pages actually render. The variable faces ship every
+// weight and italic, which cost ~188kB of font on first paint for four files.
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  weight: ["400", "500", "600"],
+  style: ["normal"],
+});
+
+// Headings inherit weight 400 under Tailwind's preflight, so one cut is enough.
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
   display: "swap",
+  weight: ["400"],
+  style: ["normal"],
 });
 
 export const metadata: Metadata = {

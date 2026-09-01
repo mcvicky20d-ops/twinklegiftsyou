@@ -1,20 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Heart, PencilLine, Sparkles, Truck } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/safe-query";
 import { site } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
+import { TrustBar } from "@/components/site/trust-bar";
 
 export const revalidate = 60;
-
-const promises = [
-  { icon: PencilLine, title: "Drawn by hand", body: "Every portrait is sketched on paper, never filtered by software." },
-  { icon: Sparkles, title: "Made to order", body: "Share a photo and a note — we build the gift around it." },
-  { icon: Truck, title: "Shipped India-wide", body: "Padded, gift-wrapped packing so nothing arrives chipped." },
-  { icon: Heart, title: "Preview before dispatch", body: "You approve a photo of the finished piece before it ships." },
-];
 
 export default async function HomePage() {
   const [categories, featured] = await Promise.all([
@@ -75,17 +69,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-14">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {promises.map((promise) => (
-            <div key={promise.title}>
-              <promise.icon className="h-6 w-6 text-brand" />
-              <p className="mt-3 font-medium">{promise.title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{promise.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TrustBar />
 
       {categories.length > 0 ? (
         <section className="mx-auto max-w-6xl px-4 py-10">
@@ -104,6 +88,14 @@ export default async function HomePage() {
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : null}
+                {/* Label sits on top of whatever image the shop uploads, so it
+                    needs a scrim rather than relying on the artwork being dark. */}
+                {category.image ? (
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/25 to-transparent"
                   />
                 ) : null}
                 <div className="relative">
@@ -132,7 +124,7 @@ export default async function HomePage() {
         <section className="mx-auto max-w-6xl px-4 py-10">
           <div className="flex items-end justify-between">
             <h2 className="font-display text-3xl">Loved this month</h2>
-            <Link href="/products" className="text-sm text-brand hover:underline">
+            <Link href="/products" className="inline-block py-1.5 text-sm text-brand hover:underline">
               View all
             </Link>
           </div>

@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/gallery`, changeFrequency: "weekly" as const, priority: 0.7 },
     { url: `${base}/about`, changeFrequency: "monthly" as const, priority: 0.5 },
     { url: `${base}/contact`, changeFrequency: "monthly" as const, priority: 0.6 },
+    { url: `${base}/faq`, changeFrequency: "monthly" as const, priority: 0.6 },
   ].map((route) => ({ ...route, lastModified: new Date() }));
 
   try {
