@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fdfaf5;
+  --color-ink: #23201d;
+  --color-muted: #7a716a;
+  --color-line: #ece4d9;
+  --color-blush: #f6e7e4;
+  --color-brand: #b4614f;
+  --color-brand-dark: #8f4839;
+  --color-gold: #c9a227;
+
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-xl2: 1.25rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Soft paper texture behind the hero, drawn in CSS so there is no image to ship. */
+.paper {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(180, 97, 79, 0.08), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(201, 162, 39, 0.1), transparent 40%);
+}
+
+@media print {
+  .no-print { display: none !important; }
+}
