@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Heart, PencilLine, Sparkles, Truck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { safeQuery } from "@/lib/safe-query";
 import { site } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
@@ -17,13 +18,17 @@ const promises = [
 
 export default async function HomePage() {
   const [categories, featured] = await Promise.all([
-    prisma.category.findMany({ orderBy: { sortOrder: "asc" }, take: 6 }),
-    prisma.product.findMany({
-      where: { isActive: true, isFeatured: true },
-      include: { category: { select: { name: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 8,
-    }),
+    safeQuery(() => prisma.category.findMany({ orderBy: { sortOrder: "asc" }, take: 6 }), []),
+    safeQuery(
+      () =>
+        prisma.product.findMany({
+          where: { isActive: true, isFeatured: true },
+          include: { category: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 8,
+        }),
+      [],
+    ),
   ]);
 
   return (

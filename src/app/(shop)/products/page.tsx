@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { safeQuery } from "@/lib/safe-query";
 import { ProductCard } from "@/components/site/product-card";
 import { cn } from "@/lib/utils";
 import type { Prisma } from "@/generated/prisma/client";
@@ -40,12 +41,16 @@ export default async function ProductsPage({
   };
 
   const [categories, products] = await Promise.all([
-    prisma.category.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.product.findMany({
-      where,
-      include: { category: { select: { name: true } } },
-      orderBy,
-    }),
+    safeQuery(() => prisma.category.findMany({ orderBy: { sortOrder: "asc" } }), []),
+    safeQuery(
+      () =>
+        prisma.product.findMany({
+          where,
+          include: { category: { select: { name: true } } },
+          orderBy,
+        }),
+      [],
+    ),
   ]);
 
   const query = (next: Record<string, string | undefined>) => {

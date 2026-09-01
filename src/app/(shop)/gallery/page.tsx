@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { safeQuery } from "@/lib/safe-query";
 import { Badge } from "@/components/ui/badge";
 
 export const revalidate = 120;
@@ -11,9 +12,13 @@ export const metadata: Metadata = {
 };
 
 export default async function GalleryPage() {
-  const items = await prisma.galleryItem.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-  });
+  const items = await safeQuery(
+    () =>
+      prisma.galleryItem.findMany({
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      }),
+    [],
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
