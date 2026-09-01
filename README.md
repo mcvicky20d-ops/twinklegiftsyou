@@ -103,6 +103,32 @@ URLs instead of uploads. Only `DATABASE_URL` and `AUTH_SECRET` are actually requ
 6. Point `twinklegiftsyou.in` at the project under **Settings → Domains**, then set
    `NEXT_PUBLIC_SITE_URL=https://twinklegiftsyou.in`.
 
+### If your Postgres is Supabase
+
+Supabase exposes every table in the `public` schema through its auto-generated
+REST API. This app never uses that API — it talks to Postgres directly through
+Prisma — so lock the API out, or password hashes in `User` and customer
+addresses in `Order` are readable with the public anon key:
+
+```sql
+ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Category" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Product" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Order" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "OrderItem" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Enquiry" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "GalleryItem" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "_prisma_migrations" ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
+REVOKE ALL ON SCHEMA public FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
+```
+
+RLS with no policies denies the anon and authenticated roles everything, while
+the owning role Prisma connects as still bypasses RLS. Re-run this after any
+`prisma migrate` that creates a new table.
+
 ### Turning on the optional services
 
 - **Cloudinary** — create an *unsigned* upload preset, then set `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
