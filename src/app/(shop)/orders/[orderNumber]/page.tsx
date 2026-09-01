@@ -7,10 +7,11 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { site } from "@/lib/site";
+import { noIndex } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Order confirmation", robots: { index: false } };
+export const metadata: Metadata = { title: "Order confirmation", ...noIndex };
 
 export default async function OrderPage({
   params,

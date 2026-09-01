@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { LoginForm } from "@/components/admin/login-form";
 import { site } from "@/lib/site";
+import { noIndex } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
+export const metadata: Metadata = { title: "Sign in", ...noIndex };
 
 export default async function LoginPage({
   searchParams,

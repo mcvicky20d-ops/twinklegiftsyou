@@ -4,14 +4,26 @@ import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/safe-query";
 import { ProductCard } from "@/components/site/product-card";
 import { cn } from "@/lib/utils";
+import { canonical } from "@/lib/seo";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description: "Pencil portraits, customised mugs and personalised photo frames, made to order.",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}): Promise<Metadata> {
+  const { category } = await searchParams;
+  return {
+    title: "Shop Personalised Gifts Online in India",
+    description:
+      "Pencil portraits, customised mugs and personalised photo frames — handmade to order and delivered across India.",
+    // A filtered view is the collection page's content, so point there rather
+    // than letting the two compete for the same terms.
+    ...canonical(category ? `/collections/${category}` : "/products"),
+  };
+}
 
 const sorts = {
   newest: { createdAt: "desc" },
@@ -83,7 +95,7 @@ export default async function ProductsPage({
         {categories.map((item) => (
           <Link
             key={item.id}
-            href={query({ category: item.slug })}
+            href={`/collections/${item.slug}`}
             className={cn(
               "rounded-full border border-line px-4 py-1.5 text-sm hover:bg-blush",
               category === item.slug && "border-brand bg-brand text-white hover:bg-brand",

@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 import { AddToCart } from "@/components/site/add-to-cart";
 import { ProductCard } from "@/components/site/product-card";
 import { Badge } from "@/components/ui/badge";
+import { absolute, breadcrumbSchema, canonical, jsonLdGraph, productSchema } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -27,12 +28,23 @@ export async function generateMetadata({
   const product = await getProduct(slug);
   if (!product) return { title: "Product not found" };
 
+  const description = `${product.description.replace(/\s+/g, " ").slice(0, 140).trim()}… Made to order, delivered across India.`;
+
   return {
-    title: product.title,
-    description: product.description.slice(0, 155),
+    title: `${product.title} — Buy Online in India`,
+    description,
+    ...canonical(`/products/${product.slug}`),
     openGraph: {
       title: product.title,
-      description: product.description.slice(0, 155),
+      description,
+      url: absolute(`/products/${product.slug}`),
+      type: "website",
+      images: product.images.slice(0, 1),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
       images: product.images.slice(0, 1),
     },
   };
@@ -49,27 +61,29 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     take: 4,
   });
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.title,
-    description: product.description,
-    image: product.images,
-    brand: { "@type": "Brand", name: site.name },
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "INR",
-      price: (product.price / 100).toFixed(2),
-      availability:
-        product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    },
-  };
+  const structuredData = jsonLdGraph(
+    productSchema({
+      title: product.title,
+      slug: product.slug,
+      description: product.description,
+      price: product.price,
+      images: product.images,
+      stock: product.stock,
+      categoryName: product.category.name,
+    }),
+    breadcrumbSchema([
+      { name: "Home", path: "/" },
+      { name: "Shop", path: "/products" },
+      { name: product.category.name, path: `/collections/${product.category.slug}` },
+      { name: product.title, path: `/products/${product.slug}` },
+    ]),
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: structuredData }}
       />
 
       <nav className="text-sm text-muted">
@@ -77,7 +91,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           Shop
         </Link>
         <span className="mx-2">/</span>
-        <Link href={`/products?category=${product.category.slug}`} className="hover:text-brand">
+        <Link href={`/collections/${product.category.slug}`} className="hover:text-brand">
           {product.category.name}
         </Link>
       </nav>

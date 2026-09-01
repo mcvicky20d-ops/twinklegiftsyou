@@ -5,8 +5,9 @@ import { auth } from "@/lib/auth";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { signOutAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
+import { noIndex } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Admin", robots: { index: false } };
+export const metadata: Metadata = { title: "Admin", ...noIndex };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();

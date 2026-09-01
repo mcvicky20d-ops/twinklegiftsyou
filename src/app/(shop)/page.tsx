@@ -94,7 +94,7 @@ export default async function HomePage() {
             {categories.map((category) => (
               <Link
                 key={category.id}
-                href={`/products?category=${category.slug}`}
+                href={`/collections/${category.slug}`}
                 className="group relative flex h-52 items-end overflow-hidden rounded-2xl border border-line bg-blush p-6"
               >
                 {category.image ? (

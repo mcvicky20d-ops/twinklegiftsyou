@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { site } from "@/lib/site";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "About",
-  description: `The story behind ${site.name} — handmade pencil art and personalised gifts.`,
+  title: "About Us — Handmade Personalised Gifts",
+  description: `The story behind ${site.name}, and how a made-to-order pencil portrait, mug or photo frame goes from your photograph to your door anywhere in India.`,
+  ...canonical("/about"),
 };
 
 const steps = [

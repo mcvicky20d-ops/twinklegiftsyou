@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { AtSign, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { site } from "@/lib/site";
 import { ContactForm } from "@/components/site/contact-form";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Contact",
-  description: "Start a custom order or ask us anything about pencil art, mugs and frames.",
+  title: "Contact & Custom Orders",
+  description:
+    "Start a custom order or ask us anything about pencil portraits, customised mugs and personalised photo frames. We ship across India.",
+  ...canonical("/contact"),
 };
 
 export default function ContactPage() {

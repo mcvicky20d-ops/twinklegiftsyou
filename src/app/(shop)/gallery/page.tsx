@@ -3,12 +3,15 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/safe-query";
 import { Badge } from "@/components/ui/badge";
+import { canonical } from "@/lib/seo";
 
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Gallery",
-  description: "A look at pencil portraits, mugs and frames we have made for other people.",
+  title: "Gallery — Pencil Portraits, Mugs & Frames We Have Made",
+  description:
+    "Real commissions: hand-drawn pencil portraits, customised mugs and personalised photo frames made for customers across India.",
+  ...canonical("/gallery"),
 };
 
 export default async function GalleryPage() {

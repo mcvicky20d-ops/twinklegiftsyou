@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/site/checkout-form";
 import { razorpayEnabled } from "@/lib/razorpay";
+import { noIndex } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Checkout" };
+export const metadata: Metadata = { title: "Checkout", ...noIndex };
 
 export default function CheckoutPage() {
   return (
