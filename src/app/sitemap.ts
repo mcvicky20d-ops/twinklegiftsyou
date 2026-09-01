@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
-import { site } from "@/lib/site";
+import { siteUrl } from "@/lib/site-url";
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${site.domain}`;
+  const base = siteUrl();
 
   const staticRoutes = ["", "/products", "/gallery", "/about", "/contact"].map((path) => ({
     url: `${base}${path}`,
