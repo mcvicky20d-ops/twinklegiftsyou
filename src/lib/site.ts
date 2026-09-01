@@ -22,10 +22,10 @@ export const site = {
   tagline: "Handmade pencil art, customised mugs & photo frames",
   description:
     "TwinkleGiftsYou creates hand-drawn pencil portraits, customised mugs and personalised photo frames — thoughtful, made-to-order gifts shipped across India.",
-  email: "hello@twinklegiftsyou.in",
+  email: "twinklegiftsyou@gmail.com",
   phone: "+91 86676 71772",
   whatsapp: "918667671772",
-  instagram: "https://instagram.com/twinklegiftsyou",
+  instagram: "https://www.instagram.com/twinklegiftsyou/",
   address: "Chennai, Tamil Nadu, India",
   city: "Chennai",
   region: "Tamil Nadu",
