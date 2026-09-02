@@ -24,9 +24,10 @@ type Props = {
     stock: number;
     customisationModes: CustomisationMode[];
   };
+  uploadsEnabled: boolean;
 };
 
-export function AddToCart({ product }: Props) {
+export function AddToCart({ product, uploadsEnabled }: Props) {
   const { add } = useCart();
   const [quantity, setQuantity] = React.useState(1);
   // Only the choices this product offers — a pencil portrait is drawn from a
@@ -128,6 +129,7 @@ export function AddToCart({ product }: Props) {
                 value={customImageUrl}
                 onChange={setCustomImageUrl}
                 hint={product.customNote ?? undefined}
+                uploadsEnabled={uploadsEnabled}
               />
             </Field>
           ) : null}

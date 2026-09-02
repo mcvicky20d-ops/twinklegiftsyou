@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { site } from "@/lib/site";
 import { AddToCart } from "@/components/site/add-to-cart";
+import { storageEnabled } from "@/lib/storage";
 import { ProductCard } from "@/components/site/product-card";
 import { Badge } from "@/components/ui/badge";
 import { absolute, breadcrumbSchema, canonical, jsonLdGraph, productSchema } from "@/lib/seo";
@@ -156,6 +157,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               stock: product.stock,
               customisationModes: product.customisationModes,
             }}
+            uploadsEnabled={storageEnabled()}
           />
 
           <dl className="mt-8 grid gap-3 border-t border-line pt-6 text-sm">

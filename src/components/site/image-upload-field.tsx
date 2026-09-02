@@ -4,52 +4,38 @@ import * as React from "react";
 import Image from "next/image";
 import { ImageUp, Loader2, X } from "lucide-react";
 import { cloudinaryEnabled, uploadToCloudinary } from "@/lib/cloudinary";
-import {
-  MAX_UPLOAD_BYTES,
-  MAX_UPLOAD_LABEL,
-  PHOTO_RECOMMENDATION,
-  formatBytes,
-} from "@/lib/customisation";
+import { uploadCustomerPhoto } from "@/lib/upload-client";
+import { MAX_UPLOAD_LABEL, PHOTO_RECOMMENDATION } from "@/lib/customisation";
 import { Input } from "@/components/ui/input";
 import { site } from "@/lib/site";
 
 /**
- * Accepts the customer's reference photograph. Uploading needs Cloudinary; when
- * that is not configured the field falls back to a link, and the checkout
- * prompt covers sending the photo on WhatsApp instead.
+ * Uploading needs somewhere to put the file. `uploadsEnabled` is decided on the
+ * server (Supabase Storage) and Cloudinary is checked here; with neither, the
+ * field falls back to a pasted link and the checkout prompt covers WhatsApp.
  */
 export function ImageUploadField({
   value,
   onChange,
   hint,
+  uploadsEnabled = false,
 }: {
   value: string;
   onChange: (url: string) => void;
   hint?: string;
+  uploadsEnabled?: boolean;
 }) {
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const canUpload = cloudinaryEnabled();
+  const useCloudinary = cloudinaryEnabled();
+  const canUpload = uploadsEnabled || useCloudinary;
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
     setError(null);
-
-    if (!file.type.startsWith("image/")) {
-      setError("That is not an image file.");
-      return;
-    }
-    // Checked before the request so a large file is never uploaded and rejected.
-    if (file.size > MAX_UPLOAD_BYTES) {
-      setError(
-        `${formatBytes(file.size)} is too large. Please keep photos under ${MAX_UPLOAD_LABEL} — a phone photo is usually fine.`,
-      );
-      return;
-    }
-
     setUploading(true);
     try {
-      onChange(await uploadToCloudinary(file));
+      onChange(useCloudinary ? await uploadToCloudinary(file) : await uploadCustomerPhoto(file));
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Upload failed.");
     } finally {
@@ -79,24 +65,36 @@ export function ImageUploadField({
   return (
     <div>
       {canUpload ? (
-        <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-white px-4 py-6 text-center hover:border-brand">
-          {uploading ? (
-            <Loader2 className="h-6 w-6 animate-spin text-brand" />
-          ) : (
-            <ImageUp className="h-6 w-6 text-brand" />
-          )}
-          <span className="text-sm font-medium">
-            {uploading ? "Uploading…" : "Choose a photo"}
-          </span>
-          <span className="text-xs text-muted">JPG or PNG, up to {MAX_UPLOAD_LABEL}</span>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={uploading}
-            onChange={(event) => handleFile(event.target.files?.[0])}
-          />
-        </label>
+        <>
+          <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-white px-4 py-6 text-center hover:border-brand">
+            {uploading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-brand" />
+            ) : (
+              <ImageUp className="h-6 w-6 text-brand" />
+            )}
+            <span className="text-sm font-medium">
+              {uploading ? "Uploading…" : "Upload a photo"}
+            </span>
+            <span className="text-xs text-muted">JPG, PNG or HEIC, up to {MAX_UPLOAD_LABEL}</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploading}
+              onChange={(event) => handleFile(event.target.files?.[0])}
+            />
+          </label>
+
+          <div className="mt-3">
+            <p className="text-xs text-muted">Or paste a link instead</p>
+            <Input
+              className="mt-1"
+              value={value}
+              onChange={(event) => onChange(event.target.value)}
+              placeholder="Google Drive, Photos or Instagram link"
+            />
+          </div>
+        </>
       ) : (
         <div className="space-y-2">
           <Input
@@ -104,7 +102,6 @@ export function ImageUploadField({
             onChange={(event) => onChange(event.target.value)}
             placeholder="Paste a link to your photo (Drive, Photos, Instagram)"
           />
-          <p className="text-xs text-muted">{PHOTO_RECOMMENDATION}</p>
           <p className="text-xs text-muted">
             Make sure the link is set so anyone with it can view, or we will not be able to open
             it. Or skip this and send it on{" "}
@@ -121,9 +118,8 @@ export function ImageUploadField({
         </div>
       )}
 
-      {canUpload ? <p className="mt-2 text-xs text-muted">{PHOTO_RECOMMENDATION}</p> : null}
+      <p className="mt-2 text-xs text-muted">{PHOTO_RECOMMENDATION}</p>
       {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
-
       {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
     </div>
   );

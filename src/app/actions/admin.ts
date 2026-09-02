@@ -219,3 +219,14 @@ export async function deleteGalleryItem(formData: FormData) {
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
 }
+
+export async function deleteStoredPhoto(formData: FormData) {
+  await requireAdmin();
+
+  const path = String(formData.get("path") ?? "");
+  if (!path) return;
+
+  const { deletePhoto } = await import("@/lib/storage");
+  await deletePhoto(path);
+  revalidatePath("/admin/library");
+}

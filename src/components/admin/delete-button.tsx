@@ -16,15 +16,18 @@ export function DeleteButton({
   id,
   confirmText,
   label = "Delete",
+  idField = "id",
 }: {
   action: (formData: FormData) => Promise<void>;
   id: string;
   confirmText: string;
   label?: string;
+  /** Field name the action reads the identifier from. */
+  idField?: string;
 }) {
   return (
     <>
-      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name={idField} value={id} />
       <button
         type="submit"
         formAction={action}
