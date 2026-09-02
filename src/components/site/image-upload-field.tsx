@@ -4,7 +4,12 @@ import * as React from "react";
 import Image from "next/image";
 import { ImageUp, Loader2, X } from "lucide-react";
 import { cloudinaryEnabled, uploadToCloudinary } from "@/lib/cloudinary";
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL, formatBytes } from "@/lib/customisation";
+import {
+  MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_LABEL,
+  PHOTO_RECOMMENDATION,
+  formatBytes,
+} from "@/lib/customisation";
 import { Input } from "@/components/ui/input";
 import { site } from "@/lib/site";
 
@@ -83,9 +88,7 @@ export function ImageUploadField({
           <span className="text-sm font-medium">
             {uploading ? "Uploading…" : "Choose a photo"}
           </span>
-          <span className="text-xs text-muted">
-            JPG or PNG, up to {MAX_UPLOAD_LABEL}. {hint}
-          </span>
+          <span className="text-xs text-muted">JPG or PNG, up to {MAX_UPLOAD_LABEL}</span>
           <input
             type="file"
             accept="image/*"
@@ -101,8 +104,10 @@ export function ImageUploadField({
             onChange={(event) => onChange(event.target.value)}
             placeholder="Paste a link to your photo (Drive, Photos, Instagram)"
           />
+          <p className="text-xs text-muted">{PHOTO_RECOMMENDATION}</p>
           <p className="text-xs text-muted">
-            Or skip this and send it on{" "}
+            Make sure the link is set so anyone with it can view, or we will not be able to open
+            it. Or skip this and send it on{" "}
             <a
               href={`https://wa.me/${site.whatsapp}`}
               target="_blank"
@@ -115,6 +120,9 @@ export function ImageUploadField({
           </p>
         </div>
       )}
+
+      {canUpload ? <p className="mt-2 text-xs text-muted">{PHOTO_RECOMMENDATION}</p> : null}
+      {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
 
       {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
     </div>

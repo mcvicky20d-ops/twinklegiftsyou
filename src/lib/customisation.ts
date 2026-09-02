@@ -43,6 +43,10 @@ export function customisationLabel(mode: CustomisationMode) {
   }
 }
 
+/** Shown wherever a photo is requested, upload field or pasted link alike. */
+export const PHOTO_RECOMMENDATION =
+  `Recommended: a clear, well-lit photo, sharp and as large as you have it — under ${MAX_UPLOAD_LABEL}. A phone photo is usually perfect. Avoid screenshots, heavy filters and blurry group shots.`;
+
 export function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;

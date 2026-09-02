@@ -28,10 +28,7 @@ export function ImageShareDialog({
   onCancel: () => void;
   onConfirm: (choice: { imageDelivery: ImageDelivery; contactConsent: boolean }) => void;
 }) {
-  const allAttached = itemsNeedingImage.length === 0;
-  const [choice, setChoice] = React.useState<ImageDelivery>(
-    allAttached ? "UPLOADED" : "WHATSAPP",
-  );
+  const [choice, setChoice] = React.useState<ImageDelivery>("WHATSAPP");
   const [consent, setConsent] = React.useState(false);
   const dialogRef = React.useRef<HTMLDivElement>(null);
 
@@ -58,16 +55,6 @@ export function ImageShareDialog({
   )}`;
 
   const options: { value: ImageDelivery; icon: typeof Upload; title: string; body: string }[] = [
-    ...(itemsWithImage > 0
-      ? [
-          {
-            value: "UPLOADED" as const,
-            icon: Upload,
-            title: "Photo already attached",
-            body: `${itemsWithImage} item${itemsWithImage > 1 ? "s" : ""} in your bag already ${itemsWithImage > 1 ? "have" : "has"} a photo. Nothing more to do.`,
-          },
-        ]
-      : []),
     {
       value: "WHATSAPP",
       icon: MessageCircle,
@@ -105,9 +92,10 @@ export function ImageShareDialog({
               How will you send your photo?
             </h2>
             <p className="mt-1.5 text-sm text-muted">
-              {allAttached
-                ? "Your photo is attached. Confirm and we will start on it."
-                : `We still need a photo for ${itemsNeedingImage.join(", ")}.`}
+              We still need a photo for {itemsNeedingImage.join(", ")}.
+              {itemsWithImage > 0
+                ? " Your other items already have theirs."
+                : ""}
             </p>
           </div>
           <button

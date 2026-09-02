@@ -65,7 +65,9 @@ export function CheckoutForm({
     .filter((item) => needsImage(item.customisationMode ?? "NONE") && !item.customImageUrl)
     .map((item) => item.title);
   const withImage = items.filter((item) => item.customImageUrl).length;
-  const needsPhotoStep = awaitingImage.length > 0 || withImage > 0;
+  // Only interrupt when a photo is actually missing. Someone who has already
+  // attached one has answered the question; asking again is friction.
+  const needsPhotoStep = awaitingImage.length > 0;
 
   const shipping = shippingFor(subtotal);
   const total = subtotal + shipping;
@@ -107,7 +109,10 @@ export function CheckoutForm({
       setShareOpen(true);
       return;
     }
-    void placeWith(customer, { imageDelivery: "NOT_NEEDED", contactConsent: false });
+    void placeWith(customer, {
+      imageDelivery: withImage > 0 ? "UPLOADED" : "NOT_NEEDED",
+      contactConsent: false,
+    });
   }
 
   async function placeWith(

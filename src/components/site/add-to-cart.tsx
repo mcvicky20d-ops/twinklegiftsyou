@@ -111,7 +111,7 @@ export function AddToCart({ product }: Props) {
           {wantsText ? (
             <Field
               label="Text to print"
-              hint={product.customNote ?? "Exactly as you want it to appear."}
+              hint="Exactly as you want it to appear."
             >
               <Textarea
                 value={customText}
@@ -127,7 +127,7 @@ export function AddToCart({ product }: Props) {
               <ImageUploadField
                 value={customImageUrl}
                 onChange={setCustomImageUrl}
-                hint="A clear, well-lit photo gives the best result."
+                hint={product.customNote ?? undefined}
               />
             </Field>
           ) : null}
