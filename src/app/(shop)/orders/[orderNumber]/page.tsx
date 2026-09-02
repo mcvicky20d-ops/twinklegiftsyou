@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { site } from "@/lib/site";
 import { noIndex } from "@/lib/seo";
+import { upiConfig, upiEnabled, upiPaymentLink, upiQrDataUrl } from "@/lib/upi";
+import { UpiPaymentPanel } from "@/components/site/upi-payment-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,14 @@ export default async function OrderPage({
 
   const pendingPayment = payment === "pending" || order.paymentStatus === "UNPAID";
 
+  // Only build the QR when this order actually chose UPI and is still unpaid.
+  const showUpi =
+    order.paymentMethod === "UPI" && order.paymentStatus !== "PAID" && upiEnabled();
+  const upiLink = showUpi
+    ? upiPaymentLink({ amountPaise: order.total, orderNumber: order.orderNumber })
+    : null;
+  const upiQr = upiLink ? await upiQrDataUrl(upiLink) : null;
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-16">
       <div className="rounded-2xl border border-line bg-white p-8 text-center">
@@ -43,15 +53,29 @@ export default async function OrderPage({
         <p className="mt-2 text-sm text-muted">
           Order <strong>{order.orderNumber}</strong> · {formatDate(order.createdAt)}
         </p>
-        {pendingPayment ? (
+        {showUpi ? (
           <p className="mx-auto mt-4 max-w-sm text-sm text-muted">
-            Payment is still pending. We will WhatsApp you a payment link along with the design
-            preview — nothing is charged until you approve it.
+            One step left — pay by UPI below and we will start straight away.
+          </p>
+        ) : pendingPayment ? (
+          <p className="mx-auto mt-4 max-w-sm text-sm text-muted">
+            We will message you on WhatsApp to complete payment, along with the design preview.
           </p>
         ) : (
           <p className="mt-4 text-sm text-muted">Payment received. We are starting on it now.</p>
         )}
       </div>
+
+      {showUpi && upiLink && upiQr ? (
+        <UpiPaymentPanel
+          orderNumber={order.orderNumber}
+          amount={order.total}
+          upiId={upiConfig.vpa}
+          paymentLink={upiLink}
+          qrDataUrl={upiQr}
+          existingReference={order.upiReference}
+        />
+      ) : null}
 
       <div className="mt-6 rounded-2xl border border-line bg-white p-6">
         <div className="flex items-center justify-between">

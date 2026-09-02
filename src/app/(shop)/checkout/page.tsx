@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/site/checkout-form";
 import { razorpayEnabled } from "@/lib/razorpay";
+import { upiConfig, upiEnabled } from "@/lib/upi";
 import { noIndex } from "@/lib/seo";
 
 export const metadata: Metadata = { title: "Checkout", ...noIndex };
+
+// Which payment routes exist is read from the environment at request time, so
+// this page must not be frozen into the build output.
+export const dynamic = "force-dynamic";
 
 export default function CheckoutPage() {
   return (
@@ -15,6 +20,8 @@ export default function CheckoutPage() {
       <CheckoutForm
         onlinePaymentEnabled={razorpayEnabled()}
         razorpayKeyId={process.env.RAZORPAY_KEY_ID ?? ""}
+        upiPaymentEnabled={upiEnabled()}
+        upiId={upiConfig.vpa}
       />
     </div>
   );

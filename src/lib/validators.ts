@@ -12,7 +12,7 @@ export const checkoutSchema = z.object({
   state: z.string().min(2).max(60),
   pincode: z.string().regex(/^\d{6}$/, "Enter a 6-digit PIN code"),
   notes: z.string().max(600).optional().or(z.literal("")),
-  paymentMethod: z.enum(["ONLINE", "COD"]),
+  paymentMethod: z.enum(["RAZORPAY", "UPI", "PENDING"]),
   acceptedTerms: z.literal(true, { message: "Please accept the terms to continue" }),
 });
 

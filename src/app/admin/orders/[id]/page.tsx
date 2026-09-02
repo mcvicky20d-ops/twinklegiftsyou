@@ -235,13 +235,38 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
             </a>
           </section>
 
-          {order.razorpayPaymentId ? (
-            <section className="rounded-2xl border border-line bg-white p-5 text-sm">
-              <h2 className="font-display text-lg">Payment</h2>
-              <p className="mt-2 break-all text-muted">Razorpay order: {order.razorpayOrderId}</p>
-              <p className="break-all text-muted">Payment: {order.razorpayPaymentId}</p>
-            </section>
-          ) : null}
+          <section className="rounded-2xl border border-line bg-white p-5 text-sm">
+            <h2 className="font-display text-lg">Payment</h2>
+            <p className="mt-2">
+              <span className="text-muted">Method: </span>
+              {order.paymentMethod === "RAZORPAY"
+                ? "Razorpay"
+                : order.paymentMethod === "UPI"
+                  ? "Direct UPI"
+                  : "To be arranged"}
+            </p>
+
+            {order.upiReference ? (
+              <div className="mt-3 rounded-xl bg-amber-50 p-3">
+                <p className="font-medium text-amber-900">Customer says they paid</p>
+                <p className="mt-1 text-amber-900">
+                  UPI reference: <strong>{order.upiReference}</strong>
+                </p>
+                <p className="mt-1 text-xs text-amber-800">
+                  Check this against your bank before marking the order paid.
+                </p>
+              </div>
+            ) : order.paymentMethod === "UPI" ? (
+              <p className="mt-3 text-muted">No UPI reference submitted yet.</p>
+            ) : null}
+
+            {order.razorpayPaymentId ? (
+              <div className="mt-3">
+                <p className="break-all text-muted">Razorpay order: {order.razorpayOrderId}</p>
+                <p className="break-all text-muted">Payment: {order.razorpayPaymentId}</p>
+              </div>
+            ) : null}
+          </section>
         </div>
       </div>
     </div>

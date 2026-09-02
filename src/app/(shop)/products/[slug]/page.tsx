@@ -154,6 +154,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               customizable: product.customizable,
               customNote: product.customNote,
               stock: product.stock,
+              customisationModes: product.customisationModes,
             }}
           />
 

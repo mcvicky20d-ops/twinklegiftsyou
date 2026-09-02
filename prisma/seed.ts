@@ -2,6 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client.js";
+import type { CustomisationMode } from "../src/generated/prisma/enums.js";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
@@ -31,11 +32,24 @@ const categories = [
   },
 ];
 
-const products = [
+const products: {
+  categorySlug: string;
+  title: string;
+  slug: string;
+  description: string;
+  price: number;
+  comparePrice?: number | null;
+  stock: number;
+  isFeatured: boolean;
+  customNote: string;
+  images: string[];
+  customisationModes?: CustomisationMode[];
+}[] = [
   {
     categorySlug: "pencil-art",
     title: "Single Portrait Pencil Sketch — A4",
     slug: "single-portrait-pencil-sketch-a4",
+    customisationModes: ["IMAGE_ONLY"],
     images: ["/samples/pencil-portrait.svg"],
     description:
       "A hand-drawn graphite portrait of one person on 300gsm acid-free paper, A4 size.\n\nSend us a clear, well-lit photograph and we will sketch it by hand. Takes 5–7 working days. Ships rolled in a hard tube, or add a frame at checkout.",
@@ -49,6 +63,7 @@ const products = [
     categorySlug: "pencil-art",
     title: "Couple Portrait Pencil Sketch — A3",
     slug: "couple-portrait-pencil-sketch-a3",
+    customisationModes: ["IMAGE_ONLY"],
     images: ["/samples/couple-portrait.svg"],
     description:
       "Two people, one sketch, A3 size. Perfect for anniversaries and weddings.\n\nDrawn entirely by hand over roughly a week. You approve a photo of the finished drawing before it is packed and shipped.",

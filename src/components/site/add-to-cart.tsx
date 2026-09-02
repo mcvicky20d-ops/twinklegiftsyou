@@ -10,6 +10,8 @@ import { ImageUploadField } from "@/components/site/image-upload-field";
 import { customisationOptions, needsImage, needsText } from "@/lib/customisation";
 import { cn } from "@/lib/utils";
 
+const gridCols: Record<number, string> = { 2: "sm:grid-cols-2", 3: "sm:grid-cols-3" };
+
 type Props = {
   product: {
     id: string;
@@ -20,13 +22,22 @@ type Props = {
     customizable: boolean;
     customNote: string | null;
     stock: number;
+    customisationModes: CustomisationMode[];
   };
 };
 
 export function AddToCart({ product }: Props) {
   const { add } = useCart();
   const [quantity, setQuantity] = React.useState(1);
-  const [mode, setMode] = React.useState<CustomisationMode>("TEXT_AND_IMAGE");
+  // Only the choices this product offers — a pencil portrait is drawn from a
+  // photograph, so it has no text-only option.
+  const allowed = customisationOptions.filter((option) =>
+    product.customisationModes.includes(option.value),
+  );
+  const options = allowed.length > 0 ? allowed : customisationOptions;
+  const [mode, setMode] = React.useState<CustomisationMode>(
+    options[options.length - 1].value,
+  );
   const [customText, setCustomText] = React.useState("");
   const [customImageUrl, setCustomImageUrl] = React.useState("");
   const [added, setAdded] = React.useState(false);
@@ -64,30 +75,38 @@ export function AddToCart({ product }: Props) {
     <div className="mt-8 space-y-5">
       {product.customizable ? (
         <div className="space-y-5 rounded-2xl border border-line bg-white p-5">
-          <div>
-            <p className="text-sm font-medium">How would you like it personalised?</p>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              {customisationOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setMode(option.value)}
-                  aria-pressed={mode === option.value}
-                  className={cn(
-                    "rounded-xl border px-3 py-3 text-left transition-colors",
-                    mode === option.value
-                      ? "border-brand bg-blush"
-                      : "border-line hover:border-brand/50",
-                  )}
-                >
-                  <span className="block text-sm font-medium">{option.label}</span>
-                  <span className="mt-0.5 block text-xs leading-snug text-muted">
-                    {option.hint}
-                  </span>
-                </button>
-              ))}
+          {options.length > 1 ? (
+            <div>
+              <p className="text-sm font-medium">How would you like it personalised?</p>
+              {/* Static class names: Tailwind cannot see one built by string
+                  concatenation, so a lookup keeps the column count real. */}
+              <div className={cn("mt-3 grid gap-2", gridCols[options.length] ?? "sm:grid-cols-3")}>
+                {options.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setMode(option.value)}
+                    aria-pressed={mode === option.value}
+                    className={cn(
+                      "rounded-xl border px-3 py-3 text-left transition-colors",
+                      mode === option.value
+                        ? "border-brand bg-blush"
+                        : "border-line hover:border-brand/50",
+                    )}
+                  >
+                    <span className="block text-sm font-medium">{option.label}</span>
+                    <span className="mt-0.5 block text-xs leading-snug text-muted">
+                      {option.hint}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="text-sm text-muted">
+              <span className="font-medium text-ink">{options[0].label}.</span> {options[0].hint}
+            </p>
+          )}
 
           {wantsText ? (
             <Field

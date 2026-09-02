@@ -28,6 +28,9 @@ const productForm = z.object({
   isFeatured: z.boolean(),
   customizable: z.boolean(),
   customNote: z.string().max(200).nullable(),
+  customisationModes: z
+    .array(z.enum(["TEXT_ONLY", "IMAGE_ONLY", "TEXT_AND_IMAGE"]))
+    .min(1, "Pick at least one personalisation option"),
 });
 
 function readProductForm(formData: FormData) {
@@ -47,6 +50,7 @@ function readProductForm(formData: FormData) {
     isFeatured: formData.get("isFeatured") === "on",
     customizable: formData.get("customizable") === "on",
     customNote: String(formData.get("customNote") ?? "").trim() || null,
+    customisationModes: formData.getAll("customisationModes").map(String),
   });
 }
 
@@ -88,6 +92,7 @@ export async function saveProduct(
     isFeatured: data.isFeatured,
     customizable: data.customizable,
     customNote: data.customNote,
+    customisationModes: data.customisationModes,
   };
 
   if (productId) {

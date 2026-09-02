@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { ImageInput } from "@/components/admin/image-input";
 import { paiseToRupees } from "@/lib/utils";
+import { customisationOptions } from "@/lib/customisation";
 
 type Product = {
   id: string;
@@ -22,6 +23,7 @@ type Product = {
   isFeatured: boolean;
   customizable: boolean;
   customNote: string | null;
+  customisationModes: string[];
 };
 
 export function ProductForm({
@@ -120,6 +122,29 @@ export function ProductForm({
             />
             Ask the buyer for personalisation
           </label>
+
+          <div>
+            <p className="mb-2 text-sm font-medium">Personalisation options offered</p>
+            <div className="space-y-2">
+              {customisationOptions.map((option) => (
+                <label key={option.value} className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="customisationModes"
+                    value={option.value}
+                    defaultChecked={
+                      product ? product.customisationModes.includes(option.value) : true
+                    }
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              Pencil portraits are drawn from a photograph, so leave only “Photo only” ticked for
+              them.
+            </p>
+          </div>
 
           <Field label="Personalisation hint">
             <Input

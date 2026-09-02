@@ -13,7 +13,14 @@ import { site } from "@/lib/site";
 import { ImageShareDialog, type ImageDelivery } from "@/components/site/image-share-dialog";
 import { needsImage } from "@/lib/customisation";
 
-type Props = { onlinePaymentEnabled: boolean; razorpayKeyId: string };
+type Props = {
+  onlinePaymentEnabled: boolean;
+  razorpayKeyId: string;
+  upiPaymentEnabled: boolean;
+  upiId: string;
+};
+
+type PaymentMethod = "RAZORPAY" | "UPI" | "PENDING";
 
 declare global {
   interface Window {
@@ -32,14 +39,21 @@ function loadRazorpayScript() {
   });
 }
 
-export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
+export function CheckoutForm({
+  onlinePaymentEnabled,
+  razorpayKeyId,
+  upiPaymentEnabled,
+  upiId,
+}: Props) {
   const router = useRouter();
   const { items, subtotal, ready, clear } = useCart();
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
-  const [paymentMethod, setPaymentMethod] = React.useState<"ONLINE" | "COD">(
-    onlinePaymentEnabled ? "ONLINE" : "COD",
+  // PENDING only appears when neither payment route is configured, so the shop
+  // can still take orders rather than showing no way to pay at all.
+  const [paymentMethod, setPaymentMethod] = React.useState<PaymentMethod>(
+    onlinePaymentEnabled ? "RAZORPAY" : upiPaymentEnabled ? "UPI" : "PENDING",
   );
   const [acceptedTerms, setAcceptedTerms] = React.useState(false);
   const [shareOpen, setShareOpen] = React.useState(false);
@@ -123,7 +137,7 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
         return;
       }
 
-      if (paymentMethod === "ONLINE" && onlinePaymentEnabled) {
+      if (paymentMethod === "RAZORPAY" && onlinePaymentEnabled) {
         const paid = await payWithRazorpay(
           result.orderId,
           result.orderNumber,
@@ -240,37 +254,61 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
 
         <div>
           <p className="mb-2 text-sm font-medium">Payment</p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3">
             {onlinePaymentEnabled ? (
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-checked:border-brand has-checked:bg-blush">
                 <input
                   type="radio"
                   name="payment"
                   className="mt-1"
-                  checked={paymentMethod === "ONLINE"}
-                  onChange={() => setPaymentMethod("ONLINE")}
+                  checked={paymentMethod === "RAZORPAY"}
+                  onChange={() => setPaymentMethod("RAZORPAY")}
                 />
                 <span>
                   <span className="block text-sm font-medium">Pay online</span>
-                  <span className="block text-xs text-muted">UPI, cards, netbanking via Razorpay</span>
+                  <span className="block text-xs text-muted">
+                    UPI, cards, netbanking and wallets via Razorpay
+                  </span>
                 </span>
               </label>
             ) : null}
-            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-checked:border-brand has-checked:bg-blush">
-              <input
-                type="radio"
-                name="payment"
-                className="mt-1"
-                checked={paymentMethod === "COD"}
-                onChange={() => setPaymentMethod("COD")}
-              />
-              <span>
-                <span className="block text-sm font-medium">Pay on confirmation</span>
-                <span className="block text-xs text-muted">
-                  We message you a UPI link once the design is approved
+
+            {upiPaymentEnabled ? (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-checked:border-brand has-checked:bg-blush">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="mt-1"
+                  checked={paymentMethod === "UPI"}
+                  onChange={() => setPaymentMethod("UPI")}
+                />
+                <span>
+                  <span className="block text-sm font-medium">Pay by UPI</span>
+                  <span className="block text-xs text-muted">
+                    Scan a QR or tap to pay {upiId} from GPay, PhonePe or any UPI app. We show the
+                    QR on the next screen.
+                  </span>
                 </span>
-              </span>
-            </label>
+              </label>
+            ) : null}
+
+            {!onlinePaymentEnabled && !upiPaymentEnabled ? (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-checked:border-brand has-checked:bg-blush">
+                <input
+                  type="radio"
+                  name="payment"
+                  className="mt-1"
+                  checked
+                  readOnly
+                />
+                <span>
+                  <span className="block text-sm font-medium">Payment link on WhatsApp</span>
+                  <span className="block text-xs text-muted">
+                    We will send you a payment link once we confirm your order.
+                  </span>
+                </span>
+              </label>
+            ) : null}
           </div>
         </div>
       </div>

@@ -38,6 +38,13 @@ enum CustomisationMode {
   TEXT_AND_IMAGE
 }
 
+/// How the buyer chose to pay.
+enum PaymentMethod {
+  RAZORPAY
+  UPI
+  PENDING
+}
+
 /// How the buyer intends to get their photograph to us.
 enum ImageDelivery {
   NOT_NEEDED
@@ -90,6 +97,9 @@ model Product {
   isActive     Boolean  @default(true)
   isFeatured   Boolean  @default(false)
   customizable Boolean  @default(true)
+  /// Which personalisation choices this product offers. A pencil portrait is
+  /// drawn from a photograph, so it has no text-only option.
+  customisationModes CustomisationMode[] @default([TEXT_ONLY, IMAGE_ONLY, TEXT_AND_IMAGE])
   /// Free-text hint shown next to the customisation box, e.g. "Send the photo you want sketched".
   customNote   String?
   stock        Int      @default(0)
@@ -123,8 +133,11 @@ model Order {
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(UNPAID)
 
+  paymentMethod     PaymentMethod @default(PENDING)
   razorpayOrderId   String?
   razorpayPaymentId String?
+  /// UTR the customer quotes after paying by UPI, for staff to reconcile.
+  upiReference      String?
 
   /// Answered by the checkout prompt, so staff know whether to expect a photo
   /// on WhatsApp or to call the customer for it.
