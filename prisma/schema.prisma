@@ -30,6 +30,22 @@ enum PaymentStatus {
   COD
 }
 
+/// How the buyer wants a personalised item made up.
+enum CustomisationMode {
+  NONE
+  TEXT_ONLY
+  IMAGE_ONLY
+  TEXT_AND_IMAGE
+}
+
+/// How the buyer intends to get their photograph to us.
+enum ImageDelivery {
+  NOT_NEEDED
+  UPLOADED
+  WHATSAPP
+  CONTACT_ME
+}
+
 enum EnquiryStatus {
   NEW
   READ
@@ -110,6 +126,12 @@ model Order {
   razorpayOrderId   String?
   razorpayPaymentId String?
 
+  /// Answered by the checkout prompt, so staff know whether to expect a photo
+  /// on WhatsApp or to call the customer for it.
+  imageDelivery  ImageDelivery @default(NOT_NEEDED)
+  /// Explicit permission to phone or message about the missing photograph.
+  contactConsent Boolean       @default(false)
+
   items OrderItem[]
 
   createdAt DateTime @default(now())
@@ -131,8 +153,9 @@ model OrderItem {
   unitPrice Int
   quantity  Int    @default(1)
 
-  customText     String?
-  customImageUrl String?
+  customisationMode CustomisationMode @default(NONE)
+  customText        String?
+  customImageUrl    String?
 
   @@index([orderId])
 }

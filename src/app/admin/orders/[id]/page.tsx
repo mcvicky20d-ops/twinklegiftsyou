@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Download, MessageCircle, PhoneCall, Upload } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatPrice } from "@/lib/utils";
+import { customisationLabel } from "@/lib/customisation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, Select } from "@/components/ui/input";
@@ -16,6 +18,34 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function needsPhoto(mode: string) {
+  return mode === "IMAGE_ONLY" || mode === "TEXT_AND_IMAGE";
+}
+
+/** How the customer said they would get their photograph to us. */
+function deliveryCopy(delivery: string, consent: boolean) {
+  switch (delivery) {
+    case "UPLOADED":
+      return { icon: Upload, title: "Uploaded at checkout", body: "The photo is attached above." };
+    case "WHATSAPP":
+      return {
+        icon: MessageCircle,
+        title: "Sending on WhatsApp",
+        body: "Watch for their message before starting work.",
+      };
+    case "CONTACT_ME":
+      return {
+        icon: PhoneCall,
+        title: "Asked us to contact them",
+        body: consent
+          ? "They gave permission to call or message for the photo."
+          : "No contact permission recorded — email them instead.",
+      };
+    default:
+      return { icon: Upload, title: "No photo needed", body: "This order is text only." };
+  }
+}
+
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const order = await prisma.order.findUnique({
@@ -23,6 +53,9 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
     include: { items: true },
   });
   if (!order) notFound();
+
+  const delivery = deliveryCopy(order.imageDelivery, order.contactConsent);
+  const DeliveryIcon = delivery.icon;
 
   return (
     <div className="space-y-6">
@@ -54,23 +87,58 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                     </p>
                     <p>{formatPrice(item.unitPrice * item.quantity)}</p>
                   </div>
+                  <p className="mt-1 text-xs uppercase tracking-wide text-muted">
+                    {customisationLabel(item.customisationMode)}
+                  </p>
+
                   {item.customText ? (
                     <p className="mt-2 rounded-lg bg-cream p-3 text-sm">
-                      <span className="text-muted">Personalisation: </span>
-                      {item.customText}
+                      <span className="text-muted">Text to print: </span>
+                      <strong className="font-medium">{item.customText}</strong>
                     </p>
                   ) : null}
+
                   {item.customImageUrl ? (
-                    <p className="mt-2 text-sm">
-                      <span className="text-muted">Reference: </span>
+                    <div className="mt-3 flex flex-wrap items-center gap-4 rounded-xl border border-line p-3">
                       <a
                         href={item.customImageUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="break-all text-brand hover:underline"
+                        className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-blush"
+                        title="Open full size"
                       >
-                        {item.customImageUrl}
+                        <Image
+                          src={item.customImageUrl}
+                          alt={`Reference photo for ${item.title}`}
+                          fill
+                          sizes="96px"
+                          className="object-cover"
+                        />
                       </a>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium">Customer&apos;s photo</p>
+                        <p className="mt-0.5 break-all text-xs text-muted">{item.customImageUrl}</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <a
+                            href={`/api/admin/download?item=${item.id}`}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-dark"
+                          >
+                            <Download className="h-3.5 w-3.5" /> Download
+                          </a>
+                          <a
+                            href={item.customImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs hover:bg-blush"
+                          >
+                            Open full size
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ) : needsPhoto(item.customisationMode) ? (
+                    <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+                      No photo attached yet — see how the customer chose to send it.
                     </p>
                   ) : null}
                 </li>
@@ -126,6 +194,17 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
               Save
             </Button>
           </form>
+
+          <section className="rounded-2xl border border-line bg-white p-5 text-sm">
+            <h2 className="font-display text-lg">Photo delivery</h2>
+            <div className="mt-3 flex items-start gap-2">
+              <DeliveryIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+              <div>
+                <p className="font-medium">{delivery.title}</p>
+                <p className="mt-0.5 text-muted">{delivery.body}</p>
+              </div>
+            </div>
+          </section>
 
           <section className="rounded-2xl border border-line bg-white p-5 text-sm">
             <h2 className="font-display text-lg">Customer</h2>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Line illustration of a colour-changing mug">
+  <rect width="800" height="800" fill="#f6e7e4"/>
+  <g fill="#23201d" opacity="0.9"><path d="M230 250h300v270c0 44-36 80-80 80H310c-44 0-80-36-80-80z"/></g>
+  <g fill="none" stroke="#23201d" stroke-width="7" stroke-linecap="round">
+    <path d="M530 310h56c40 0 72 32 72 72s-32 72-72 72h-56"/>
+  </g>
+  <g fill="none" stroke="#fdfaf5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="300" y="350" width="160" height="130" rx="8"/>
+    <circle cx="344" cy="392" r="16"/>
+    <path d="M310 470l52-56 34 36 30-28 44 48"/>
+  </g>
+  <g fill="none" stroke="#c9a227" stroke-width="6" stroke-linecap="round" opacity="0.85">
+    <path d="M300 190c0-26 22-26 22-52M370 190c0-26 22-26 22-52M440 190c0-26 22-26 22-52"/>
+  </g>
+</svg>

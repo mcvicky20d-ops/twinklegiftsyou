@@ -41,3 +41,42 @@ body {
 @media print {
   .no-print { display: none !important; }
 }
+
+/* ---- Festive decoration ------------------------------------------------
+   Gift papers and confetti drifting down, like paper falling after a party
+   popper. Transform/opacity only, so it stays off the main thread. */
+@keyframes tgy-drift {
+  0%   { transform: translate3d(0, -12%, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: var(--tgy-opacity, 0.5); }
+  90%  { opacity: var(--tgy-opacity, 0.5); }
+  100% { transform: translate3d(var(--tgy-drift, 20px), 112%, 0) rotate(var(--tgy-spin, 220deg)); opacity: 0; }
+}
+
+@keyframes tgy-sway {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-4deg); }
+  50%      { transform: translate3d(0, -10px, 0) rotate(4deg); }
+}
+
+.tgy-confetti {
+  animation: tgy-drift var(--tgy-duration, 9s) linear var(--tgy-delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+.tgy-sway {
+  animation: tgy-sway var(--tgy-duration, 6s) ease-in-out var(--tgy-delay, 0s) infinite;
+}
+
+/* Anyone who has asked their device to reduce motion gets a still page. */
+@media (prefers-reduced-motion: reduce) {
+  .tgy-confetti,
+  .tgy-sway {
+    animation: none !important;
+  }
+  .tgy-confetti { opacity: var(--tgy-opacity, 0.5); }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

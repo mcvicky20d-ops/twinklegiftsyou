@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmation } from "@/lib/mail";
 import { newOrderNumber } from "@/lib/utils";
-import { cartItemSchema, checkoutSchema } from "@/lib/validators";
+import { cartItemSchema, checkoutSchema, imageDeliverySchema } from "@/lib/validators";
 import { shippingFor } from "@/lib/pricing";
 
 export type PlaceOrderResult =
@@ -14,6 +14,7 @@ export type PlaceOrderResult =
 const payloadSchema = z.object({
   customer: checkoutSchema,
   items: z.array(cartItemSchema).min(1, "Your bag is empty"),
+  sharing: imageDeliverySchema,
 });
 
 export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
@@ -29,7 +30,7 @@ export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
     };
   }
 
-  const { customer, items } = parsed.data;
+  const { customer, items, sharing } = parsed.data;
 
   // Never trust prices from the browser — re-read them from the database.
   const products = await prisma.product.findMany({
@@ -45,6 +46,7 @@ export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
       title: product.title,
       unitPrice: product.price,
       quantity: item.quantity,
+      customisationMode: item.customisationMode ?? "NONE",
       customText: item.customText || null,
       customImageUrl: item.customImageUrl || null,
     };
@@ -74,6 +76,8 @@ export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
       shipping,
       total,
       paymentStatus: customer.paymentMethod === "COD" ? "COD" : "UNPAID",
+      imageDelivery: sharing.imageDelivery,
+      contactConsent: sharing.contactConsent,
       items: { create: lines },
     },
     include: { items: true },

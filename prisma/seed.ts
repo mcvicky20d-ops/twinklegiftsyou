@@ -49,7 +49,7 @@ const products = [
     categorySlug: "pencil-art",
     title: "Couple Portrait Pencil Sketch — A3",
     slug: "couple-portrait-pencil-sketch-a3",
-    images: ["/samples/pencil-portrait.svg"],
+    images: ["/samples/couple-portrait.svg"],
     description:
       "Two people, one sketch, A3 size. Perfect for anniversaries and weddings.\n\nDrawn entirely by hand over roughly a week. You approve a photo of the finished drawing before it is packed and shipped.",
     price: 249900,
@@ -75,7 +75,7 @@ const products = [
     categorySlug: "customised-mugs",
     title: "Magic Colour-Changing Mug",
     slug: "magic-colour-changing-mug",
-    images: ["/samples/custom-mug.svg"],
+    images: ["/samples/magic-mug.svg"],
     description:
       "Black on the outside until hot coffee reveals your photo. Always a good reaction.\n\nHand wash recommended to keep the effect crisp.",
     price: 54900,
@@ -87,7 +87,7 @@ const products = [
     categorySlug: "photo-frames",
     title: "Engraved Wooden Photo Frame — 8×10",
     slug: "engraved-wooden-photo-frame-8x10",
-    images: ["/samples/photo-frame.svg"],
+    images: ["/samples/engraved-frame.svg"],
     description:
       "Solid wood frame with your photo and a laser-engraved name or date on the base.\n\nComes ready to stand or hang, packed in a gift box.",
     price: 89900,
@@ -100,7 +100,7 @@ const products = [
     categorySlug: "photo-frames",
     title: "Collage Photo Frame — 6 Photos",
     slug: "collage-photo-frame-6-photos",
-    images: ["/samples/photo-frame.svg"],
+    images: ["/samples/collage-frame.svg"],
     description:
       "Six of your favourite photographs arranged in one frame — a year, a trip or a friendship in a single piece.",
     price: 119900,

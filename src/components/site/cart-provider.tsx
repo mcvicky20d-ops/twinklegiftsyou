@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+export type CustomisationMode = "NONE" | "TEXT_ONLY" | "IMAGE_ONLY" | "TEXT_AND_IMAGE";
+
 export type CartItem = {
   productId: string;
   slug: string;
@@ -9,6 +11,7 @@ export type CartItem = {
   price: number;
   image?: string;
   quantity: number;
+  customisationMode?: CustomisationMode;
   customText?: string;
   customImageUrl?: string;
 };
@@ -82,6 +85,7 @@ export function useCart() {
           const index = existingItems.findIndex(
             (existing) =>
               existing.productId === item.productId &&
+              (existing.customisationMode ?? "NONE") === (item.customisationMode ?? "NONE") &&
               (existing.customText ?? "") === (item.customText ?? "") &&
               (existing.customImageUrl ?? "") === (item.customImageUrl ?? ""),
           );

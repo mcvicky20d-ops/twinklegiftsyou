@@ -13,13 +13,22 @@ export const checkoutSchema = z.object({
   pincode: z.string().regex(/^\d{6}$/, "Enter a 6-digit PIN code"),
   notes: z.string().max(600).optional().or(z.literal("")),
   paymentMethod: z.enum(["ONLINE", "COD"]),
+  acceptedTerms: z.literal(true, { message: "Please accept the terms to continue" }),
 });
 
 export const cartItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.number().int().min(1).max(99),
+  customisationMode: z
+    .enum(["NONE", "TEXT_ONLY", "IMAGE_ONLY", "TEXT_AND_IMAGE"])
+    .optional(),
   customText: z.string().max(300).optional(),
   customImageUrl: z.string().max(500).optional(),
+});
+
+export const imageDeliverySchema = z.object({
+  imageDelivery: z.enum(["NOT_NEEDED", "UPLOADED", "WHATSAPP", "CONTACT_ME"]),
+  contactConsent: z.boolean(),
 });
 
 export const enquirySchema = z.object({

@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+
 import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/safe-query";
-import { site } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
 import { TrustBar } from "@/components/site/trust-bar";
+import { HeroSlider } from "@/components/site/hero-slider";
+import { Confetti } from "@/components/site/decorations";
 
 export const revalidate = 60;
 
@@ -27,47 +28,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="paper border-b border-line">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 lg:grid-cols-2 lg:py-24">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-brand ring-1 ring-line">
-              <Sparkles className="h-3.5 w-3.5" /> Handmade personalised gifts
-            </span>
-            <h1 className="mt-5 font-display text-4xl leading-tight sm:text-5xl lg:text-6xl">
-              Gifts that carry <span className="text-brand">your story</span>
-            </h1>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted">
-              Pencil portraits sketched from your favourite photograph, mugs printed with the
-              inside joke only you two get, and frames built around the moment worth keeping.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/products">
-                <Button size="lg">
-                  Shop the collection <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <a href={`https://wa.me/${site.whatsapp}`} target="_blank" rel="noreferrer">
-                <Button size="lg" variant="outline">
-                  Ask for a custom piece
-                </Button>
-              </a>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {["Pencil portraits", "Custom mugs", "Photo frames", "Gift hampers"].map((label, index) => (
-              <div
-                key={label}
-                className={`flex aspect-square items-end rounded-2xl border border-line bg-white p-5 shadow-sm ${
-                  index % 3 === 0 ? "bg-blush" : ""
-                }`}
-              >
-                <p className="font-display text-lg leading-snug">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HeroSlider />
 
       <TrustBar />
 
@@ -146,13 +107,14 @@ export default async function HomePage() {
       )}
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="rounded-2xl bg-brand px-8 py-14 text-center text-white">
-          <h2 className="font-display text-3xl">Have a photo in mind?</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-white/85">
+        <div className="relative overflow-hidden rounded-2xl bg-brand px-8 py-14 text-center text-white">
+          <Confetti count={14} className="opacity-70" />
+          <h2 className="relative font-display text-3xl">Have a photo in mind?</h2>
+          <p className="relative mx-auto mt-3 max-w-md text-sm text-white/85">
             Send it across and we will tell you exactly how it will look as a sketch, a mug or a
             framed keepsake — before you pay a rupee.
           </p>
-          <Link href="/contact" className="mt-7 inline-block">
+          <Link href="/contact" className="relative mt-7 inline-block">
             <Button variant="outline" size="lg">
               Start a custom order
             </Button>

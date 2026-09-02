@@ -10,6 +10,8 @@ import { Field, Input, Textarea } from "@/components/ui/input";
 import { formatPrice } from "@/lib/utils";
 import { shippingFor } from "@/lib/pricing";
 import { site } from "@/lib/site";
+import { ImageShareDialog, type ImageDelivery } from "@/components/site/image-share-dialog";
+import { needsImage } from "@/lib/customisation";
 
 type Props = { onlinePaymentEnabled: boolean; razorpayKeyId: string };
 
@@ -39,6 +41,17 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
   const [paymentMethod, setPaymentMethod] = React.useState<"ONLINE" | "COD">(
     onlinePaymentEnabled ? "ONLINE" : "COD",
   );
+  const [acceptedTerms, setAcceptedTerms] = React.useState(false);
+  const [shareOpen, setShareOpen] = React.useState(false);
+  // Held while the dialog is open so submission can resume once answered.
+  const pendingCustomer = React.useRef<Record<string, unknown> | null>(null);
+
+  // Which lines still owe us a photograph, and which already carry one.
+  const awaitingImage = items
+    .filter((item) => needsImage(item.customisationMode ?? "NONE") && !item.customImageUrl)
+    .map((item) => item.title);
+  const withImage = items.filter((item) => item.customImageUrl).length;
+  const needsPhotoStep = awaitingImage.length > 0 || withImage > 0;
 
   const shipping = shippingFor(subtotal);
   const total = subtotal + shipping;
@@ -54,9 +67,8 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
     );
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
     setError(null);
     setFieldErrors({});
 
@@ -72,14 +84,33 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
       pincode: String(form.get("pincode") ?? ""),
       notes: String(form.get("notes") ?? ""),
       paymentMethod,
+      acceptedTerms: true as const,
     };
+
+    pendingCustomer.current = customer;
+
+    if (needsPhotoStep) {
+      setShareOpen(true);
+      return;
+    }
+    void placeWith(customer, { imageDelivery: "NOT_NEEDED", contactConsent: false });
+  }
+
+  async function placeWith(
+    customer: Record<string, unknown>,
+    sharing: { imageDelivery: ImageDelivery; contactConsent: boolean },
+  ) {
+    setShareOpen(false);
+    setPending(true);
 
     try {
       const result = await placeOrder({
         customer,
+        sharing,
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          customisationMode: item.customisationMode ?? "NONE",
           customText: item.customText,
           customImageUrl: item.customImageUrl,
         })),
@@ -93,7 +124,11 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
       }
 
       if (paymentMethod === "ONLINE" && onlinePaymentEnabled) {
-        const paid = await payWithRazorpay(result.orderId, result.orderNumber, customer);
+        const paid = await payWithRazorpay(
+          result.orderId,
+          result.orderNumber,
+          customer as unknown as { customerName: string; email: string; phone: string },
+        );
         if (!paid) {
           // The order exists and is marked unpaid — the customer can still be
           // followed up, so send them to the confirmation page either way.
@@ -267,15 +302,46 @@ export function CheckoutForm({ onlinePaymentEnabled, razorpayKeyId }: Props) {
           </div>
         </dl>
 
+        <label className="mt-5 flex items-start gap-3 text-xs text-muted">
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(event) => setAcceptedTerms(event.target.checked)}
+            className="mt-0.5"
+            required
+          />
+          <span>
+            I have read the{" "}
+            <Link href="/terms" target="_blank" className="text-brand hover:underline">
+              terms and conditions
+            </Link>
+            , including that personalised gifts cannot be returned unless an unboxing video shows
+            the damage.
+          </span>
+        </label>
+
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
 
-        <Button type="submit" size="lg" className="mt-6 w-full" disabled={pending || !ready}>
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-4 w-full"
+          disabled={pending || !ready || !acceptedTerms}
+        >
           {pending ? "Placing order…" : `Place order · ${formatPrice(total)}`}
         </Button>
-        <p className="mt-3 text-center text-xs text-muted">
-          By ordering you agree to our made-to-order policy.
-        </p>
       </aside>
+
+      <ImageShareDialog
+        open={shareOpen}
+        itemsNeedingImage={awaitingImage}
+        itemsWithImage={withImage}
+        orderReference={`${items.length} item${items.length > 1 ? "s" : ""}`}
+        onCancel={() => setShareOpen(false)}
+        onConfirm={(choice) => {
+          if (pendingCustomer.current) void placeWith(pendingCustomer.current, choice);
+        }}
+      />
     </form>
   );
 }
