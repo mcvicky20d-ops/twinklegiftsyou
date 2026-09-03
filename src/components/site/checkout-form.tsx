@@ -137,8 +137,19 @@ export function CheckoutForm({
 
       if (!result.ok) {
         setError(result.error);
-        setFieldErrors(result.fieldErrors ?? {});
+        const errors = result.fieldErrors ?? {};
+        setFieldErrors(errors);
         setPending(false);
+        // The summary sits in the sidebar, which on a phone is far below the
+        // fields it refers to. Move the visitor to the first problem instead.
+        const firstField = Object.keys(errors)[0];
+        if (firstField) {
+          requestAnimationFrame(() => {
+            const input = document.querySelector<HTMLElement>(`[name="${firstField}"]`);
+            input?.scrollIntoView({ behavior: "smooth", block: "center" });
+            input?.focus({ preventScroll: true });
+          });
+        }
         return;
       }
 
@@ -222,34 +233,59 @@ export function CheckoutForm({
         <h2 className="font-display text-xl">Delivery details</h2>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Full name" hint={errorFor("customerName")}>
-            <Input name="customerName" required autoComplete="name" />
+          <Field label="Full name" error={errorFor("customerName")}>
+            <Input name="customerName" required minLength={2} maxLength={80} autoComplete="name" />
           </Field>
-          <Field label="Mobile number" hint={errorFor("phone") ?? "10 digits, for delivery updates"}>
-            <Input name="phone" required inputMode="numeric" autoComplete="tel-national" />
+          <Field
+            label="Mobile number"
+            error={errorFor("phone")}
+            hint="10 digits, for delivery updates"
+          >
+            <Input
+              name="phone"
+              required
+              inputMode="numeric"
+              // Caught by the browser before a round trip to the server.
+              pattern="[6-9][0-9]{9}"
+              title="A 10-digit Indian mobile number starting 6, 7, 8 or 9"
+              autoComplete="tel-national"
+            />
           </Field>
         </div>
 
-        <Field label="Email" hint={errorFor("email")}>
+        <Field label="Email" error={errorFor("email")}>
           <Input name="email" type="email" required autoComplete="email" />
         </Field>
 
-        <Field label="Address" hint={errorFor("addressLine1")}>
-          <Input name="addressLine1" required placeholder="House / street" autoComplete="address-line1" />
+        <Field label="Address" error={errorFor("addressLine1")}>
+          <Input
+            name="addressLine1"
+            required
+            minLength={5}
+            placeholder="House / street"
+            autoComplete="address-line1"
+          />
         </Field>
         <Field label="Landmark / area (optional)">
           <Input name="addressLine2" autoComplete="address-line2" />
         </Field>
 
         <div className="grid gap-5 sm:grid-cols-3">
-          <Field label="City" hint={errorFor("city")}>
-            <Input name="city" required autoComplete="address-level2" />
+          <Field label="City" error={errorFor("city")}>
+            <Input name="city" required minLength={2} autoComplete="address-level2" />
           </Field>
-          <Field label="State" hint={errorFor("state")}>
-            <Input name="state" required autoComplete="address-level1" />
+          <Field label="State" error={errorFor("state")}>
+            <Input name="state" required minLength={2} autoComplete="address-level1" />
           </Field>
-          <Field label="PIN code" hint={errorFor("pincode")}>
-            <Input name="pincode" required inputMode="numeric" autoComplete="postal-code" />
+          <Field label="PIN code" error={errorFor("pincode")}>
+            <Input
+              name="pincode"
+              required
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              title="A 6-digit PIN code"
+              autoComplete="postal-code"
+            />
           </Field>
         </div>
 

@@ -20,13 +20,26 @@ const payloadSchema = z.object({
 export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
   const parsed = payloadSchema.safeParse(payload);
   if (!parsed.success) {
-    const flat = z.flattenError(parsed.error);
+    // Customer fields sit under `customer` in the payload, so a flatten at the
+    // top level buries every message one level down and the form has nothing
+    // to highlight. Walk the issues instead and key them by the field name the
+    // checkout form actually renders.
+    const fieldErrors: Record<string, string[]> = {};
+    for (const issue of parsed.error.issues) {
+      const [head, next] = issue.path;
+      const field = head === "customer" ? next : head;
+      if (typeof field !== "string") continue;
+      (fieldErrors[field] ??= []).push(issue.message);
+    }
+
+    const itemsProblem = parsed.error.issues.find((issue) => issue.path[0] === "items");
+
     return {
       ok: false,
-      error: "Please check the highlighted fields.",
-      fieldErrors: flat.fieldErrors.customer
-        ? {}
-        : (flat.fieldErrors as Record<string, string[]>),
+      error: itemsProblem
+        ? itemsProblem.message
+        : "Please correct the fields marked in red below.",
+      fieldErrors,
     };
   }
 
