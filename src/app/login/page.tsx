@@ -21,10 +21,10 @@ export default async function LoginPage({
           <Image
             src="/brand/logo-wordmark.webp"
             alt={site.name}
-            width={1200}
-            height={243}
+            width={373}
+            height={53}
             priority
-            className="h-8 w-auto"
+            className="h-7 w-auto"
           />
         </Link>
         <p className="mt-2 text-center text-sm text-muted">Admin sign in</p>

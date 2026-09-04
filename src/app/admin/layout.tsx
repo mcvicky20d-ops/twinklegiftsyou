@@ -23,8 +23,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Image
               src="/brand/logo-wordmark.webp"
               alt="TwinkleGiftsYou"
-              width={1200}
-              height={243}
+              width={373}
+              height={53}
               className="h-6 w-auto"
             />
           </Link>

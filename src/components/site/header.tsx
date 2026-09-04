@@ -21,11 +21,11 @@ export function Header() {
           <Image
             src="/brand/logo-wordmark.webp"
             alt={site.name}
-            width={1200}
-            height={243}
+            width={373}
+            height={53}
             priority
             // Sized by height so the mark keeps its proportions in the bar.
-            className="h-7 w-auto sm:h-8"
+            className="h-6 w-auto sm:h-7"
           />
         </Link>
 
