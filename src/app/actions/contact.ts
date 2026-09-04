@@ -26,7 +26,7 @@ export async function submitEnquiry(
   if (!parsed.success) {
     return {
       status: "error",
-      message: "Please check the form and try again.",
+      message: "Please correct the fields marked in red below.",
       fieldErrors: z.flattenError(parsed.error).fieldErrors,
     };
   }
@@ -45,5 +45,5 @@ export async function submitEnquiry(
 
   await sendEnquiryNotification(data);
 
-  return { status: "success", message: "Thank you! We usually reply within a day." };
+  return { status: "success", message: "Thank you — we reply within 12 hours." };
 }

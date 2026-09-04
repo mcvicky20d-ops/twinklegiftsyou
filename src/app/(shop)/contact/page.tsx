@@ -16,8 +16,8 @@ export default function ContactPage() {
     <div className="mx-auto max-w-5xl px-4 py-14">
       <h1 className="font-display text-4xl">Let&apos;s make something</h1>
       <p className="mt-2 max-w-xl text-sm text-muted">
-        Tell us the occasion, the budget and the photo you have in mind. We will come back with a
-        quote and a timeline.
+        Tell us the occasion, the budget and the photo you have in mind. We reply within 12
+        hours with a quote and a timeline.
       </p>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_300px]">

@@ -31,7 +31,7 @@ export default function FaqPage() {
       <h1 className="font-display text-4xl">Questions, answered</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted">
         Everything people usually ask before ordering. If yours is not here, message us — we reply
-        the same day, most days.
+        within 12 hours.
       </p>
 
       <div className="mt-10 divide-y divide-line rounded-2xl border border-line bg-white">
