@@ -47,10 +47,11 @@ export default async function OpengraphImage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          {/* Satori needs an explicit display on any element with more than one child. */}
+          {/* Set in type rather than pulling the logo file: this card is
+              rendered at build time, where fetching an asset is fragile. */}
           <div style={{ display: "flex", fontSize: 40, color: "#23201d" }}>
             <span>Twinkle</span>
-            <span style={{ color: "#b4614f" }}>Gifts</span>
+            <span style={{ color: "#cf8577" }}>Gifts</span>
             <span>You</span>
           </div>
           <div style={{ fontSize: 30, color: "#7a716a" }}>{site.domain}</div>

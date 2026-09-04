@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { AtSign, Mail, Phone } from "lucide-react";
 import { footerLinks, site } from "@/lib/site";
@@ -7,9 +8,13 @@ export function Footer() {
     <footer className="mt-24 border-t border-line bg-white">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="sm:col-span-2 lg:col-span-2">
-          <p className="font-display text-xl">
-            Twinkle<span className="text-brand">Gifts</span>You
-          </p>
+          <Image
+            src="/brand/logo-wordmark.webp"
+            alt={site.name}
+            width={1200}
+            height={243}
+            className="h-7 w-auto"
+          />
           <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{site.description}</p>
         </div>
 

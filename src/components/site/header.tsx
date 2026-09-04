@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, ShoppingBag, X } from "lucide-react";
@@ -16,8 +17,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-cream/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="font-display text-xl tracking-tight">
-          Twinkle<span className="text-brand">Gifts</span>You
+        <Link href="/" className="flex items-center" aria-label={`${site.name} home`}>
+          <Image
+            src="/brand/logo-wordmark.webp"
+            alt={site.name}
+            width={1200}
+            height={243}
+            priority
+            // Sized by height so the mark keeps its proportions in the bar.
+            className="h-7 w-auto sm:h-8"
+          />
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">

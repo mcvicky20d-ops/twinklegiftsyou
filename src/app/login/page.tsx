@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { LoginForm } from "@/components/admin/login-form";
@@ -16,8 +17,15 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
-        <Link href="/" className="block text-center font-display text-2xl">
-          Twinkle<span className="text-brand">Gifts</span>You
+        <Link href="/" className="flex justify-center">
+          <Image
+            src="/brand/logo-wordmark.webp"
+            alt={site.name}
+            width={1200}
+            height={243}
+            priority
+            className="h-8 w-auto"
+          />
         </Link>
         <p className="mt-2 text-center text-sm text-muted">Admin sign in</p>
 

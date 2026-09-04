@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
@@ -18,8 +19,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="flex min-h-screen bg-cream">
       <aside className="hidden w-60 shrink-0 border-r border-line bg-white lg:block">
         <div className="p-6">
-          <Link href="/" className="font-display text-lg">
-            Twinkle<span className="text-brand">Gifts</span>You
+          <Link href="/" className="block">
+            <Image
+              src="/brand/logo-wordmark.webp"
+              alt="TwinkleGiftsYou"
+              width={1200}
+              height={243}
+              className="h-6 w-auto"
+            />
           </Link>
           <p className="mt-1 text-xs text-muted">Admin panel</p>
         </div>
