@@ -132,6 +132,33 @@ const gallery = [
   { title: "Engraved teak frame", tag: "Photo Frames", caption: "Laser-engraved names on the base", image: "/samples/photo-frame.svg" },
 ];
 
+/**
+ * Starting delivery zones. These are guesses at sensible Indian courier bands —
+ * the shop edits them under Admin -> Delivery.
+ */
+const shippingZones = [
+  { name: "Tamil Nadu", fee: 0, states: ["Tamil Nadu"], isDefault: false, sortOrder: 1 },
+  {
+    name: "South India",
+    fee: 2000,
+    states: ["Kerala", "Karnataka", "Andhra Pradesh", "Telangana", "Puducherry"],
+    isDefault: false,
+    sortOrder: 2,
+  },
+  { name: "Rest of India", fee: 5000, states: [], isDefault: true, sortOrder: 3 },
+  {
+    name: "North East, Islands & J&K",
+    fee: 9000,
+    states: [
+      "Assam", "Arunachal Pradesh", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+      "Tripura", "Sikkim", "Jammu and Kashmir", "Ladakh",
+      "Andaman and Nicobar Islands", "Lakshadweep",
+    ],
+    isDefault: false,
+    sortOrder: 4,
+  },
+];
+
 async function main() {
   const email = (process.env.ADMIN_EMAIL ?? "admin@twinklegiftsyou.in").toLowerCase();
   const password = process.env.ADMIN_PASSWORD ?? "ChangeMe123!";
@@ -177,6 +204,11 @@ async function main() {
         sortOrder: index,
       })),
     });
+  }
+
+  // Only seed zones into an empty table, so edits are never overwritten.
+  if ((await prisma.shippingZone.count()) === 0) {
+    await prisma.shippingZone.createMany({ data: shippingZones });
   }
 
   console.log(`Seeded ${categories.length} categories and ${products.length} products.`);

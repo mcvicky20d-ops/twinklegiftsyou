@@ -24,6 +24,7 @@ const productForm = z.object({
   categoryId: z.string().min(1, "Pick a category"),
   images: z.array(z.string()).max(6),
   stock: z.number().int().min(0),
+  shippingFee: z.number().min(0, "Delivery fee cannot be negative"),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
   customizable: z.boolean(),
@@ -46,6 +47,7 @@ function readProductForm(formData: FormData) {
       .map((value) => value.trim())
       .filter(Boolean),
     stock: Number(formData.get("stock") ?? 0),
+    shippingFee: Number(formData.get("shippingFee") ?? 79),
     isActive: formData.get("isActive") === "on",
     isFeatured: formData.get("isFeatured") === "on",
     customizable: formData.get("customizable") === "on",
@@ -88,6 +90,7 @@ export async function saveProduct(
     categoryId: data.categoryId,
     images: data.images,
     stock: data.stock,
+    shippingFee: rupeesToPaise(data.shippingFee),
     isActive: data.isActive,
     isFeatured: data.isFeatured,
     customizable: data.customizable,
@@ -229,4 +232,50 @@ export async function deleteStoredPhoto(formData: FormData) {
   const { deletePhoto } = await import("@/lib/storage");
   await deletePhoto(path);
   revalidatePath("/admin/library");
+}
+
+export async function saveShippingZone(formData: FormData) {
+  await requireAdmin();
+
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  if (name.length < 2) return;
+
+  const data = {
+    name,
+    fee: rupeesToPaise(Number(formData.get("fee") ?? 0)),
+    // One state per line in the textarea keeps names with spaces intact.
+    states: String(formData.get("states") ?? "")
+      .split(/[\n,]/)
+      .map((value) => value.trim())
+      .filter(Boolean),
+    isDefault: formData.get("isDefault") === "on",
+    sortOrder: Number(formData.get("sortOrder") ?? 0),
+  };
+
+  if (data.isDefault) {
+    // Exactly one zone can be the catch-all, or an unlisted state matches at random.
+    await prisma.shippingZone.updateMany({
+      where: id ? { NOT: { id } } : {},
+      data: { isDefault: false },
+    });
+  }
+
+  if (id) {
+    await prisma.shippingZone.update({ where: { id }, data });
+  } else {
+    await prisma.shippingZone.create({ data });
+  }
+
+  revalidatePath("/admin/shipping");
+  revalidatePath("/checkout");
+}
+
+export async function deleteShippingZone(formData: FormData) {
+  await requireAdmin();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await prisma.shippingZone.delete({ where: { id } });
+  revalidatePath("/admin/shipping");
 }

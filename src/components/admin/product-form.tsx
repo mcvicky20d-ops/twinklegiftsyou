@@ -24,6 +24,7 @@ type Product = {
   customizable: boolean;
   customNote: string | null;
   customisationModes: string[];
+  shippingFee: number;
 };
 
 export function ProductForm({
@@ -97,6 +98,20 @@ export function ProductForm({
               defaultValue={
                 product?.comparePrice != null ? paiseToRupees(product.comparePrice) : ""
               }
+            />
+          </Field>
+
+          <Field
+            label="Delivery fee (₹)"
+            hint="Charged once per order, on top of the area surcharge."
+          >
+            <Input
+              name="shippingFee"
+              type="number"
+              min={0}
+              step="1"
+              required
+              defaultValue={product ? paiseToRupees(product.shippingFee) : 79}
             />
           </Field>
 

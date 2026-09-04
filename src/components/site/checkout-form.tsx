@@ -8,7 +8,7 @@ import { placeOrder } from "@/app/actions/orders";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/input";
 import { formatPrice } from "@/lib/utils";
-import { shippingFor } from "@/lib/pricing";
+import { DEFAULT_SHIPPING_FEE, quoteShipping, type ShippingZoneRule } from "@/lib/pricing";
 import { site } from "@/lib/site";
 import { ImageShareDialog, type ImageDelivery } from "@/components/site/image-share-dialog";
 import { needsImage } from "@/lib/customisation";
@@ -18,6 +18,7 @@ type Props = {
   razorpayKeyId: string;
   upiPaymentEnabled: boolean;
   upiId: string;
+  zones: ShippingZoneRule[];
 };
 
 type PaymentMethod = "RAZORPAY" | "UPI" | "PENDING";
@@ -44,6 +45,7 @@ export function CheckoutForm({
   razorpayKeyId,
   upiPaymentEnabled,
   upiId,
+  zones,
 }: Props) {
   const router = useRouter();
   const { items, subtotal, ready, clear } = useCart();
@@ -69,7 +71,18 @@ export function CheckoutForm({
   // attached one has answered the question; asking again is friction.
   const needsPhotoStep = awaitingImage.length > 0;
 
-  const shipping = shippingFor(subtotal);
+  // Recomputed as the visitor types their state, so the total is never a
+  // surprise at the last step. The server recalculates it anyway.
+  const [state, setState] = React.useState("");
+  const quote = quoteShipping(
+    items.map((item) => ({
+      shippingFee: item.shippingFee ?? DEFAULT_SHIPPING_FEE,
+      quantity: item.quantity,
+    })),
+    zones,
+    state,
+  );
+  const shipping = quote.total;
   const total = subtotal + shipping;
 
   if (ready && items.length === 0) {
@@ -274,8 +287,25 @@ export function CheckoutForm({
           <Field label="City" error={errorFor("city")}>
             <Input name="city" required minLength={2} autoComplete="address-level2" />
           </Field>
-          <Field label="State" error={errorFor("state")}>
-            <Input name="state" required minLength={2} autoComplete="address-level1" />
+          <Field
+            label="State"
+            error={errorFor("state")}
+            hint={quote.resolved ? undefined : "Sets your delivery charge"}
+          >
+            <Input
+              name="state"
+              required
+              minLength={2}
+              autoComplete="address-level1"
+              list="delivery-states"
+              value={state}
+              onChange={(event) => setState(event.target.value)}
+            />
+            <datalist id="delivery-states">
+              {zones.flatMap((zone) => zone.states).map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
           </Field>
           <Field label="PIN code" error={errorFor("pincode")}>
             <Input
@@ -372,8 +402,18 @@ export function CheckoutForm({
             <dd>{formatPrice(subtotal)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted">Shipping</dt>
-            <dd>{shipping === 0 ? "Free" : formatPrice(shipping)}</dd>
+            <dt className="text-muted">
+              Delivery
+              {quote.zoneName && quote.resolved ? (
+                <span className="block text-xs">{quote.zoneName}</span>
+              ) : null}
+            </dt>
+            <dd className="text-right">
+              {formatPrice(shipping)}
+              {quote.resolved ? null : (
+                <span className="block text-xs text-muted">enter state</span>
+              )}
+            </dd>
           </div>
           <div className="flex justify-between pt-2 text-base font-medium">
             <dt>Total</dt>

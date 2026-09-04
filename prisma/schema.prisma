@@ -97,6 +97,9 @@ model Product {
   isActive     Boolean  @default(true)
   isFeatured   Boolean  @default(false)
   customizable Boolean  @default(true)
+  /// Delivery charge for this item, in paise. The cart pays the highest of
+  /// these once, because the shop posts one parcel rather than one per item.
+  shippingFee  Int      @default(7900)
   /// Which personalisation choices this product offers. A pencil portrait is
   /// drawn from a photograph, so it has no text-only option.
   customisationModes CustomisationMode[] @default([TEXT_ONLY, IMAGE_ONLY, TEXT_AND_IMAGE])
@@ -110,6 +113,21 @@ model Product {
 
   @@index([categoryId])
   @@index([isActive, isFeatured])
+}
+
+/// Delivery surcharge by destination. States are matched case-insensitively;
+/// the zone flagged isDefault catches anything unlisted.
+model ShippingZone {
+  id        String   @id @default(cuid())
+  name      String
+  /// Extra charge on top of the product's own delivery fee, in paise.
+  fee       Int      @default(0)
+  states    String[] @default([])
+  isDefault Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([sortOrder])
 }
 
 model Order {
@@ -126,9 +144,12 @@ model Order {
   pincode      String
   notes        String?
 
-  subtotal  Int
-  shipping  Int @default(0)
-  total     Int
+  subtotal Int
+  shipping Int @default(0)
+  /// Which zone was applied, kept so an old order still explains its charge
+  /// after the zones are edited.
+  shippingZone String?
+  total        Int
 
   status        OrderStatus   @default(PENDING)
   paymentStatus PaymentStatus @default(UNPAID)

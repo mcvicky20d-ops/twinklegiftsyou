@@ -150,7 +150,9 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
                 <dd>{formatPrice(order.subtotal)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Shipping</dt>
+                <dt className="text-muted">
+                  Delivery{order.shippingZone ? ` · ${order.shippingZone}` : ""}
+                </dt>
                 <dd>{formatPrice(order.shipping)}</dd>
               </div>
               <div className="flex justify-between text-base font-medium">

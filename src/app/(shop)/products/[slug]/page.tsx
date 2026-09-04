@@ -156,6 +156,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               customNote: product.customNote,
               stock: product.stock,
               customisationModes: product.customisationModes,
+              shippingFee: product.shippingFee,
             }}
             uploadsEnabled={storageEnabled()}
           />
@@ -166,8 +167,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <dd>5–7 working days for customised pieces</dd>
             </div>
             <div className="flex gap-3">
-              <dt className="w-36 text-muted">Shipping</dt>
-              <dd>Across India, tracked and padded</dd>
+              <dt className="w-36 text-muted">Delivery</dt>
+              <dd>
+                From {formatPrice(product.shippingFee)} — the exact charge depends on your state
+                and is shown at checkout
+              </dd>
             </div>
             <div className="flex gap-3">
               <dt className="w-36 text-muted">Questions?</dt>

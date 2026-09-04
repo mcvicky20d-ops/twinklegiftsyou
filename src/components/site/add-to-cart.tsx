@@ -23,6 +23,7 @@ type Props = {
     customNote: string | null;
     stock: number;
     customisationModes: CustomisationMode[];
+    shippingFee: number;
   };
   uploadsEnabled: boolean;
 };
@@ -62,6 +63,7 @@ export function AddToCart({ product, uploadsEnabled }: Props) {
       slug: product.slug,
       title: product.title,
       price: product.price,
+      shippingFee: product.shippingFee,
       image: product.image,
       quantity,
       customisationMode: product.customizable ? mode : "NONE",

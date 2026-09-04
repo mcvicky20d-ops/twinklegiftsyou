@@ -9,6 +9,8 @@ export type CartItem = {
   slug: string;
   title: string;
   price: number;
+  /** Copied from the product so the bag can quote delivery without a fetch. */
+  shippingFee?: number;
   image?: string;
   quantity: number;
   customisationMode?: CustomisationMode;

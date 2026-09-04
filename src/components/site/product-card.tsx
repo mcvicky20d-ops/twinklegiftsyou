@@ -8,6 +8,7 @@ export type ProductCardData = {
   price: number;
   comparePrice: number | null;
   images: string[];
+  shippingFee?: number;
   category: { name: string } | null;
 };
 
@@ -51,12 +52,19 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         <h3 className="mt-1 line-clamp-2 text-sm font-medium text-ink group-hover:text-brand">
           {product.title}
         </h3>
-        <div className="mt-auto flex items-baseline gap-2 pt-3">
-          <span className="font-display text-lg">{formatPrice(product.price)}</span>
-          {product.comparePrice && product.comparePrice > product.price ? (
-            <span className="text-xs text-muted line-through">
-              {formatPrice(product.comparePrice)}
-            </span>
+        <div className="mt-auto pt-3">
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-lg">{formatPrice(product.price)}</span>
+            {product.comparePrice && product.comparePrice > product.price ? (
+              <span className="text-xs text-muted line-through">
+                {formatPrice(product.comparePrice)}
+              </span>
+            ) : null}
+          </div>
+          {typeof product.shippingFee === "number" ? (
+            <p className="mt-0.5 text-xs text-muted">
+              + {formatPrice(product.shippingFee)} delivery
+            </p>
           ) : null}
         </div>
       </div>

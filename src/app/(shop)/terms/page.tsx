@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 import { AlertTriangle, Video } from "lucide-react";
 import { canonical } from "@/lib/seo";
 import { site } from "@/lib/site";
-import { formatPrice } from "@/lib/utils";
-import { FREE_SHIPPING_ABOVE, SHIPPING_FEE } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
@@ -112,12 +110,13 @@ export default function TermsPage() {
         <section>
           <h2 className="font-display text-xl text-ink">6. Delivery</h2>
           <p className="mt-2">
-            We ship across India with tracking. Shipping is free on orders above{" "}
-            {formatPrice(FREE_SHIPPING_ABOVE)} and {formatPrice(SHIPPING_FEE)} otherwise. Delivery
-            timelines are estimates from our courier partners and can be affected by weather,
-            strikes and local restrictions. Please make sure the address and mobile number you give
-            us are correct — a parcel returned because nobody could be reached will need the
-            shipping paid again.
+            We ship across India with tracking. Delivery is charged on every order. The amount
+            depends on the item you have chosen and on the destination, and the exact figure is
+            shown at checkout once you enter your state — nothing is added after you have paid.
+            Delivery timelines are estimates from our courier partners and can be affected by
+            weather, strikes and local restrictions. Please make sure the address and mobile number
+            you give us are correct — a parcel returned because nobody could be reached will need
+            the delivery paid again.
           </p>
         </section>
 

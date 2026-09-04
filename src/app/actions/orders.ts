@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmation } from "@/lib/mail";
 import { newOrderNumber } from "@/lib/utils";
 import { cartItemSchema, checkoutSchema, imageDeliverySchema } from "@/lib/validators";
-import { shippingFor } from "@/lib/pricing";
+import { DEFAULT_SHIPPING_FEE, quoteShipping } from "@/lib/pricing";
 
 export type PlaceOrderResult =
   | { ok: true; orderNumber: string; orderId: string; total: number }
@@ -70,8 +70,17 @@ export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
   }
 
   const subtotal = lines.reduce((total, line) => total + line.unitPrice * line.quantity, 0);
-  const shipping = shippingFor(subtotal);
-  const total = subtotal + shipping;
+
+  const zones = await prisma.shippingZone.findMany({ orderBy: { sortOrder: "asc" } });
+  const quote = quoteShipping(
+    items.map((item) => ({
+      shippingFee: byId.get(item.productId)?.shippingFee ?? DEFAULT_SHIPPING_FEE,
+      quantity: item.quantity,
+    })),
+    zones,
+    customer.state,
+  );
+  const total = subtotal + quote.total;
 
   const order = await prisma.order.create({
     data: {
@@ -86,7 +95,8 @@ export async function placeOrder(payload: unknown): Promise<PlaceOrderResult> {
       pincode: customer.pincode,
       notes: customer.notes || null,
       subtotal,
-      shipping,
+      shipping: quote.total,
+      shippingZone: quote.zoneName,
       total,
       paymentMethod: customer.paymentMethod,
       paymentStatus: "UNPAID",

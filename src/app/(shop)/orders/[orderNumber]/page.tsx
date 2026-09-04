@@ -105,8 +105,13 @@ export default async function OrderPage({
             <dd>{formatPrice(order.subtotal)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted">Shipping</dt>
-            <dd>{order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</dd>
+            <dt className="text-muted">
+              Delivery
+              {order.shippingZone ? (
+                <span className="block text-xs">{order.shippingZone}</span>
+              ) : null}
+            </dt>
+            <dd>{formatPrice(order.shipping)}</dd>
           </div>
           <div className="flex justify-between text-base font-medium">
             <dt>Total</dt>

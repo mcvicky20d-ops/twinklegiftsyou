@@ -4,7 +4,7 @@ import { PencilLine, ShieldCheck, Sparkles, Truck } from "lucide-react";
 const points = [
   { icon: PencilLine, title: "Drawn by hand", body: "Never a filter or a print-on-demand template" },
   { icon: Sparkles, title: "Preview first", body: "You approve a photo before it ships" },
-  { icon: Truck, title: "All-India delivery", body: "Tracked and padded, free above ₹999" },
+  { icon: Truck, title: "All-India delivery", body: "Tracked and padded, charged by destination" },
   { icon: ShieldCheck, title: "Secure checkout", body: "UPI, cards and netbanking via Razorpay" },
 ];
 

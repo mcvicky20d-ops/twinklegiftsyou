@@ -23,7 +23,7 @@ export const faqs = [
   {
     question: "Do you deliver everywhere in India?",
     answer:
-      "Yes, we ship anywhere in India with tracking. Shipping is free on orders above ₹999, and ₹79 otherwise. Every parcel is padded and gift-wrapped.",
+      "Yes, we ship anywhere in India with tracking. Delivery is charged on every order — the amount depends on the item and on where it is going, and the exact figure appears at checkout once you enter your state. Every parcel is padded and gift-wrapped.",
   },
   {
     question: "How do I pay?",

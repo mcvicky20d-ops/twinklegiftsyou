@@ -6,11 +6,16 @@ import { Trash2 } from "lucide-react";
 import { useCart } from "@/components/site/cart-provider";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
-import { FREE_SHIPPING_ABOVE, shippingFor } from "@/lib/pricing";
+import { DEFAULT_SHIPPING_FEE } from "@/lib/pricing";
 
 export default function CartPage() {
   const { items, subtotal, ready, updateQuantity, remove } = useCart();
-  const shipping = shippingFor(subtotal);
+  // Only the item side of delivery is knowable here; the area surcharge needs
+  // a state, which the customer gives at checkout.
+  const deliveryFrom =
+    items.length === 0
+      ? 0
+      : Math.max(...items.map((item) => item.shippingFee ?? DEFAULT_SHIPPING_FEE));
 
   if (!ready) {
     return <div className="mx-auto max-w-6xl px-4 py-20 text-sm text-muted">Loading your bag…</div>;
@@ -99,20 +104,19 @@ export default function CartPage() {
               <dd>{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted">Shipping</dt>
-              <dd>{shipping === 0 ? "Free" : formatPrice(shipping)}</dd>
+              <dt className="text-muted">Delivery from</dt>
+              <dd>{formatPrice(deliveryFrom)}</dd>
             </div>
             <div className="flex justify-between border-t border-line pt-3 text-base font-medium">
-              <dt>Total</dt>
-              <dd>{formatPrice(subtotal + shipping)}</dd>
+              <dt>Total from</dt>
+              <dd>{formatPrice(subtotal + deliveryFrom)}</dd>
             </div>
           </dl>
 
-          {shipping > 0 ? (
-            <p className="mt-3 text-xs text-muted">
-              Add {formatPrice(FREE_SHIPPING_ABOVE - subtotal)} more for free shipping.
-            </p>
-          ) : null}
+          <p className="mt-3 text-xs text-muted">
+            Delivery depends on where it is going. Enter your state at checkout for the exact
+            amount.
+          </p>
 
           <Link href="/checkout" className="mt-6 block">
             <Button size="lg" className="w-full">
