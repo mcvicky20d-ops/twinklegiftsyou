@@ -11,8 +11,8 @@ export function Footer() {
           <Image
             src="/brand/logo-wordmark.webp"
             alt={site.name}
-            width={373}
-            height={53}
+            width={294}
+            height={41}
             className="h-6 w-auto"
           />
           <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted">{site.description}</p>

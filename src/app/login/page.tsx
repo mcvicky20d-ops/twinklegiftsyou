@@ -21,8 +21,8 @@ export default async function LoginPage({
           <Image
             src="/brand/logo-wordmark.webp"
             alt={site.name}
-            width={373}
-            height={53}
+            width={294}
+            height={41}
             priority
             className="h-7 w-auto"
           />
