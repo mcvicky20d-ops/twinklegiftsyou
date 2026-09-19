@@ -7,6 +7,7 @@ import { safeQuery } from "@/lib/safe-query";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { ProfileForm } from "@/components/site/profile-form";
+import { DeleteAccountPanel } from "@/components/site/delete-account-panel";
 import { noIndex } from "@/lib/seo";
 
 export const metadata: Metadata = { title: "My account", ...noIndex };
@@ -108,6 +109,9 @@ export default async function AccountPage() {
             </ul>
           )}
         </section>
+        <DeleteAccountPanel
+          requestedAt={user?.deletionRequestedAt ? user.deletionRequestedAt.toISOString() : null}
+        />
       </div>
     </div>
   );

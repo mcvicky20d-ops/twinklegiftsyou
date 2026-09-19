@@ -73,6 +73,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = user.role ?? undefined;
+        // Written once per sign-in rather than on every request, so the admin
+        // panel can show who is still active without a write on each page view.
+        if (user.id) {
+          await prisma.user
+            .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
+            .catch(() => undefined);
+        }
       }
       // The adapter creates Google users without passing role back through the
       // provider, so read it once and keep it in the token from then on.

@@ -71,8 +71,19 @@ model User {
   image         String?
   phone         String?
   role          Role      @default(CUSTOMER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  /// Stamped on every sign-in, so the admin panel can count who is still
+  /// using the shop rather than guessing from the sign-up date.
+  lastLoginAt DateTime?
+
+  /// Set when the customer asks us to close their account. Deleting is done
+  /// by hand from the admin panel, because an order in progress has to be
+  /// finished (or refunded) before the account behind it can go.
+  deletionRequestedAt DateTime?
+  deletionReason      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   accounts  Account[]
   sessions  Session[]

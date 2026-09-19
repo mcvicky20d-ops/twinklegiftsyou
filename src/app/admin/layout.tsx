@@ -34,13 +34,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-line bg-white px-4 lg:px-8">
-          <div className="lg:hidden">
+        <header className="flex h-16 items-center gap-2 border-b border-line bg-white px-4 lg:px-8">
+          {/* min-w-0 lets the icon strip scroll instead of pushing the header
+              wider than the phone it is on. */}
+          <div className="min-w-0 flex-1 lg:hidden">
             <AdminNav compact />
           </div>
-          <div className="ml-auto flex items-center gap-3">
-            <span className="hidden text-sm text-muted sm:inline">{session.user.email}</span>
-            <Link href="/" className="text-sm text-brand hover:underline">
+          <div className="flex shrink-0 items-center gap-3 lg:ml-auto">
+            <span className="hidden text-sm text-muted lg:inline">{session.user.email}</span>
+            <Link href="/" className="hidden text-sm text-brand hover:underline sm:inline">
               View site
             </Link>
             <form action={signOutAdminAction}>
