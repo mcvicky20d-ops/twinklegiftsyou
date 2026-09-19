@@ -10,7 +10,7 @@ export async function authenticate(_previous: LoginState, formData: FormData): P
     await signIn("credentials", {
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
-      redirectTo: String(formData.get("callbackUrl") || "/admin"),
+      redirectTo: String(formData.get("callbackUrl") || "/account"),
     });
     return {};
   } catch (error) {
@@ -22,6 +22,18 @@ export async function authenticate(_previous: LoginState, formData: FormData): P
   }
 }
 
+/** Hands off to Google. The provider only exists when its keys are set. */
+export async function signInWithGoogle(formData: FormData) {
+  await signIn("google", {
+    redirectTo: String(formData.get("callbackUrl") || "/account"),
+  });
+}
+
 export async function signOutAction() {
+  await signOut({ redirectTo: "/" });
+}
+
+/** Staff sign-out lands back on the sign-in screen rather than the shop. */
+export async function signOutAdminAction() {
   await signOut({ redirectTo: "/login" });
 }

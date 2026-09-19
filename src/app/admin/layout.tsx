@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { AdminNav } from "@/components/admin/admin-nav";
-import { signOutAction } from "@/app/actions/auth";
+import { signOutAdminAction } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { noIndex } from "@/lib/seo";
 
@@ -43,7 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link href="/" className="text-sm text-brand hover:underline">
               View site
             </Link>
-            <form action={signOutAction}>
+            <form action={signOutAdminAction}>
               <Button type="submit" variant="outline" size="sm">
                 Sign out
               </Button>

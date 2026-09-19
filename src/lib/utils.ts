@@ -45,3 +45,13 @@ export function newOrderNumber() {
   const noise = Math.random().toString(36).slice(2, 6).toUpperCase();
   return `TGY-${stamp}${noise}`;
 }
+
+/**
+ * Short, human-quotable id for a saved address, e.g. ADR-7K2Q9F. It goes on the
+ * order so a gift sent to someone else can be identified over a phone call
+ * without reading the whole address back.
+ */
+export function newAddressReference() {
+  const noise = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `ADR-${noise}`;
+}

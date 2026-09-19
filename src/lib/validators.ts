@@ -1,5 +1,35 @@
 import { z } from "zod";
 
+/** Shared address rules, reused by checkout and the saved address book. */
+const phoneRule = z
+  .string()
+  .regex(/^[6-9]\d{9}$/, "Enter a 10-digit Indian mobile number");
+
+export const registerSchema = z
+  .object({
+    name: z.string().min(2, "Please enter your name").max(80),
+    email: z.string().email("Enter a valid email"),
+    phone: z.union([phoneRule, z.literal("")]).optional(),
+    password: z.string().min(8, "Use at least 8 characters").max(72),
+    confirmPassword: z.string(),
+  })
+  .refine((value) => value.password === value.confirmPassword, {
+    message: "Both passwords must match",
+    path: ["confirmPassword"],
+  });
+
+export const addressSchema = z.object({
+  label: z.string().min(1, "Give this address a name").max(40),
+  fullName: z.string().min(2, "Please enter a name").max(80),
+  phone: phoneRule,
+  addressLine1: z.string().min(5, "Enter the address").max(160),
+  addressLine2: z.string().max(160).optional().or(z.literal("")),
+  city: z.string().min(2, "Enter the city").max(60),
+  state: z.string().min(2, "Enter the state").max(60),
+  pincode: z.string().regex(/^\d{6}$/, "Enter a 6-digit PIN code"),
+  isDefault: z.boolean().optional(),
+});
+
 export const checkoutSchema = z.object({
   customerName: z.string().min(2, "Please enter your name").max(80),
   email: z.string().email("Enter a valid email"),
@@ -14,6 +44,27 @@ export const checkoutSchema = z.object({
   notes: z.string().max(600).optional().or(z.literal("")),
   paymentMethod: z.enum(["RAZORPAY", "UPI", "PENDING"]),
   acceptedTerms: z.literal(true, { message: "Please accept the terms to continue" }),
+
+  /// A gift is delivered to someone other than the buyer, so the parcel needs
+  /// the recipient's name and number and the card needs a message.
+  isGift: z.boolean().optional(),
+  recipientName: z.string().max(80).optional().or(z.literal("")),
+  recipientPhone: z.union([phoneRule, z.literal("")]).optional(),
+  giftMessage: z.string().max(400).optional().or(z.literal("")),
+
+  /// The saved address this was filled from, and whether to keep a new one.
+  addressId: z.string().max(40).optional().or(z.literal("")),
+  saveAddress: z.boolean().optional(),
+  saveAddressLabel: z.string().max(40).optional().or(z.literal("")),
+}).superRefine((value, ctx) => {
+  if (!value.isGift) return;
+  if ((value.recipientName ?? "").trim().length < 2) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["recipientName"],
+      message: "Who is the gift for?",
+    });
+  }
 });
 
 export const cartItemSchema = z.object({
@@ -55,4 +106,5 @@ export const productSchema = z.object({
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
+export type AddressInput = z.infer<typeof addressSchema>;
 export type CartItemInput = z.infer<typeof cartItemSchema>;

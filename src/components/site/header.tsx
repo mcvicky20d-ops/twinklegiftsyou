@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag, X } from "lucide-react";
+import { Menu, ShoppingBag, User, X } from "lucide-react";
 import * as React from "react";
 import { navigation, site } from "@/lib/site";
 import { useCart } from "@/components/site/cart-provider";
@@ -46,6 +46,15 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           <Link
+            href="/account"
+            aria-label="My account"
+            // No session read here on purpose: the header stays statically
+            // rendered, and /account bounces a signed-out visitor to sign in.
+            className="rounded-full p-2 hover:bg-blush"
+          >
+            <User className="h-5 w-5" />
+          </Link>
+          <Link
             href="/cart"
             aria-label={`Cart with ${ready ? count : 0} items`}
             className="relative rounded-full p-2 hover:bg-blush"
@@ -80,6 +89,13 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <Link
+            href="/account"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-2 py-2.5 text-sm text-ink hover:bg-blush"
+          >
+            My account
+          </Link>
           <a
             href={`https://wa.me/${site.whatsapp}`}
             className="block rounded-lg px-2 py-2.5 text-sm text-brand"

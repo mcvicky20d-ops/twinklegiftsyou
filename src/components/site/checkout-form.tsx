@@ -7,11 +7,26 @@ import { useCart } from "@/components/site/cart-provider";
 import { placeOrder } from "@/app/actions/orders";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/input";
-import { formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { DEFAULT_SHIPPING_FEE, quoteShipping, type ShippingZoneRule } from "@/lib/pricing";
 import { site } from "@/lib/site";
 import { ImageShareDialog, type ImageDelivery } from "@/components/site/image-share-dialog";
 import { needsImage } from "@/lib/customisation";
+import { Gift } from "lucide-react";
+
+export type CheckoutAddress = {
+  id: string;
+  reference: string;
+  label: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+};
 
 type Props = {
   onlinePaymentEnabled: boolean;
@@ -19,6 +34,9 @@ type Props = {
   upiPaymentEnabled: boolean;
   upiId: string;
   zones: ShippingZoneRule[];
+  signedIn: boolean;
+  account: { name: string; email: string; phone: string } | null;
+  addresses: CheckoutAddress[];
 };
 
 type PaymentMethod = "RAZORPAY" | "UPI" | "PENDING";
@@ -46,6 +64,9 @@ export function CheckoutForm({
   upiPaymentEnabled,
   upiId,
   zones,
+  signedIn,
+  account,
+  addresses,
 }: Props) {
   const router = useRouter();
   const { items, subtotal, ready, clear } = useCart();
@@ -71,16 +92,75 @@ export function CheckoutForm({
   // attached one has answered the question; asking again is friction.
   const needsPhotoStep = awaitingImage.length > 0;
 
-  // Recomputed as the visitor types their state, so the total is never a
+  const defaultAddress = addresses.find((entry) => entry.isDefault) ?? addresses[0] ?? null;
+
+  // Every field is controlled: a saved address fills them in one click, and
+  // React 19 would otherwise reset uncontrolled inputs after a failed action.
+  const [values, setValues] = React.useState({
+    customerName: account?.name ?? "",
+    email: account?.email ?? "",
+    phone: account?.phone ?? "",
+    addressLine1: defaultAddress?.addressLine1 ?? "",
+    addressLine2: defaultAddress?.addressLine2 ?? "",
+    city: defaultAddress?.city ?? "",
+    state: defaultAddress?.state ?? "",
+    pincode: defaultAddress?.pincode ?? "",
+    notes: "",
+  });
+  const set =
+    (key: keyof typeof values) =>
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setValues((previous) => ({ ...previous, [key]: event.target.value }));
+
+  const [addressId, setAddressId] = React.useState<string>(defaultAddress?.id ?? "");
+  const [saveNewAddress, setSaveNewAddress] = React.useState(signedIn);
+  const [saveAddressLabel, setSaveAddressLabel] = React.useState("");
+
+  // A gift goes to someone else: the address above becomes theirs, and we add
+  // their name, number and the message that goes on the card.
+  const [isGift, setIsGift] = React.useState(false);
+  const [gift, setGift] = React.useState({ recipientName: "", recipientPhone: "", giftMessage: "" });
+
+  function applySavedAddress(entry: CheckoutAddress) {
+    setAddressId(entry.id);
+    setValues((previous) => ({
+      ...previous,
+      addressLine1: entry.addressLine1,
+      addressLine2: entry.addressLine2,
+      city: entry.city,
+      state: entry.state,
+      pincode: entry.pincode,
+      // A saved address carries whoever receives it, which for a gift is the
+      // recipient rather than the person paying.
+      ...(isGift ? {} : { customerName: previous.customerName || entry.fullName }),
+    }));
+    if (isGift) {
+      setGift((previous) => ({
+        ...previous,
+        recipientName: previous.recipientName || entry.fullName,
+        recipientPhone: previous.recipientPhone || entry.phone,
+      }));
+    }
+    setSaveNewAddress(false);
+  }
+
+  // Editing any address line means this is no longer the saved address.
+  function editAddress(key: keyof typeof values) {
+    return (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setAddressId("");
+      set(key)(event);
+    };
+  }
+
+  // The delivery quote follows the state field, so the total is never a
   // surprise at the last step. The server recalculates it anyway.
-  const [state, setState] = React.useState("");
   const quote = quoteShipping(
     items.map((item) => ({
       shippingFee: item.shippingFee ?? DEFAULT_SHIPPING_FEE,
       quantity: item.quantity,
     })),
     zones,
-    state,
+    values.state,
   );
   const shipping = quote.total;
   const total = subtotal + shipping;
@@ -101,19 +181,18 @@ export function CheckoutForm({
     setError(null);
     setFieldErrors({});
 
-    const form = new FormData(event.currentTarget);
     const customer = {
-      customerName: String(form.get("customerName") ?? ""),
-      email: String(form.get("email") ?? ""),
-      phone: String(form.get("phone") ?? ""),
-      addressLine1: String(form.get("addressLine1") ?? ""),
-      addressLine2: String(form.get("addressLine2") ?? ""),
-      city: String(form.get("city") ?? ""),
-      state: String(form.get("state") ?? ""),
-      pincode: String(form.get("pincode") ?? ""),
-      notes: String(form.get("notes") ?? ""),
+      ...values,
       paymentMethod,
       acceptedTerms: true as const,
+      isGift,
+      recipientName: isGift ? gift.recipientName : "",
+      recipientPhone: isGift ? gift.recipientPhone : "",
+      giftMessage: isGift ? gift.giftMessage : "",
+      addressId,
+      // Only offer to keep an address that did not come from the book already.
+      saveAddress: signedIn && !addressId && saveNewAddress,
+      saveAddressLabel,
     };
 
     pendingCustomer.current = customer;
@@ -243,11 +322,19 @@ export function CheckoutForm({
   return (
     <form onSubmit={handleSubmit} className="mt-10 grid gap-8 lg:grid-cols-[1fr_340px]">
       <div className="space-y-5 rounded-2xl border border-line bg-white p-6">
-        <h2 className="font-display text-xl">Delivery details</h2>
+        <h2 className="font-display text-xl">Your details</h2>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Full name" error={errorFor("customerName")}>
-            <Input name="customerName" required minLength={2} maxLength={80} autoComplete="name" />
+            <Input
+              name="customerName"
+              required
+              minLength={2}
+              maxLength={80}
+              autoComplete="name"
+              value={values.customerName}
+              onChange={set("customerName")}
+            />
           </Field>
           <Field
             label="Mobile number"
@@ -262,13 +349,124 @@ export function CheckoutForm({
               pattern="[6-9][0-9]{9}"
               title="A 10-digit Indian mobile number starting 6, 7, 8 or 9"
               autoComplete="tel-national"
+              value={values.phone}
+              onChange={set("phone")}
             />
           </Field>
         </div>
 
         <Field label="Email" error={errorFor("email")}>
-          <Input name="email" type="email" required autoComplete="email" />
+          <Input
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={values.email}
+            onChange={set("email")}
+          />
         </Field>
+
+        <div className="rounded-xl border border-line p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={isGift}
+              onChange={(event) => setIsGift(event.target.checked)}
+            />
+            <span>
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Gift className="h-4 w-4 text-brand" />
+                This is a gift for someone else
+              </span>
+              <span className="block text-xs text-muted">
+                We deliver to their address, leave the price off the parcel and write your message
+                on a card.
+              </span>
+            </span>
+          </label>
+
+          {isGift ? (
+            <div className="mt-4 space-y-4 border-t border-line pt-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Who is it for?" error={errorFor("recipientName")}>
+                  <Input
+                    name="recipientName"
+                    required
+                    minLength={2}
+                    maxLength={80}
+                    value={gift.recipientName}
+                    onChange={(event) =>
+                      setGift((previous) => ({ ...previous, recipientName: event.target.value }))
+                    }
+                  />
+                </Field>
+                <Field
+                  label="Their mobile number"
+                  error={errorFor("recipientPhone")}
+                  hint="So the courier can reach them"
+                >
+                  <Input
+                    name="recipientPhone"
+                    inputMode="numeric"
+                    pattern="[6-9][0-9]{9}"
+                    title="A 10-digit Indian mobile number starting 6, 7, 8 or 9"
+                    value={gift.recipientPhone}
+                    onChange={(event) =>
+                      setGift((previous) => ({ ...previous, recipientPhone: event.target.value }))
+                    }
+                  />
+                </Field>
+              </div>
+              <Field
+                label="Message on the gift card"
+                error={errorFor("giftMessage")}
+                hint="Up to 400 characters — we write it out by hand"
+              >
+                <Textarea
+                  name="giftMessage"
+                  maxLength={400}
+                  placeholder="Happy birthday, Amma! With all my love — Vicky"
+                  value={gift.giftMessage}
+                  onChange={(event) =>
+                    setGift((previous) => ({ ...previous, giftMessage: event.target.value }))
+                  }
+                />
+              </Field>
+            </div>
+          ) : null}
+        </div>
+
+        <h2 className="pt-2 font-display text-xl">
+          {isGift ? "Where should the gift go?" : "Delivery address"}
+        </h2>
+
+        {addresses.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {addresses.map((entry) => (
+              <button
+                key={entry.id}
+                type="button"
+                onClick={() => applySavedAddress(entry)}
+                className={cn(
+                  "rounded-xl border p-3 text-left text-xs transition-colors",
+                  addressId === entry.id
+                    ? "border-brand bg-blush"
+                    : "border-line hover:border-brand",
+                )}
+              >
+                <span className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">{entry.label}</span>
+                  <span className="font-mono text-[11px] text-muted">{entry.reference}</span>
+                </span>
+                <span className="mt-1 block text-muted">
+                  {entry.fullName} · {entry.addressLine1}, {entry.city}, {entry.state}{" "}
+                  {entry.pincode}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <Field label="Address" error={errorFor("addressLine1")}>
           <Input
@@ -277,15 +475,29 @@ export function CheckoutForm({
             minLength={5}
             placeholder="House / street"
             autoComplete="address-line1"
+            value={values.addressLine1}
+            onChange={editAddress("addressLine1")}
           />
         </Field>
         <Field label="Landmark / area (optional)">
-          <Input name="addressLine2" autoComplete="address-line2" />
+          <Input
+            name="addressLine2"
+            autoComplete="address-line2"
+            value={values.addressLine2}
+            onChange={editAddress("addressLine2")}
+          />
         </Field>
 
         <div className="grid gap-5 sm:grid-cols-3">
           <Field label="City" error={errorFor("city")}>
-            <Input name="city" required minLength={2} autoComplete="address-level2" />
+            <Input
+              name="city"
+              required
+              minLength={2}
+              autoComplete="address-level2"
+              value={values.city}
+              onChange={editAddress("city")}
+            />
           </Field>
           <Field
             label="State"
@@ -298,8 +510,8 @@ export function CheckoutForm({
               minLength={2}
               autoComplete="address-level1"
               list="delivery-states"
-              value={state}
-              onChange={(event) => setState(event.target.value)}
+              value={values.state}
+              onChange={editAddress("state")}
             />
             <datalist id="delivery-states">
               {zones.flatMap((zone) => zone.states).map((option) => (
@@ -315,12 +527,56 @@ export function CheckoutForm({
               pattern="[0-9]{6}"
               title="A 6-digit PIN code"
               autoComplete="postal-code"
+              value={values.pincode}
+              onChange={editAddress("pincode")}
             />
           </Field>
         </div>
 
+        {signedIn && !addressId ? (
+          <div className="rounded-xl bg-blush/50 p-4">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={saveNewAddress}
+                onChange={(event) => setSaveNewAddress(event.target.checked)}
+              />
+              <span>
+                Save this address to my account
+                <span className="block text-xs text-muted">
+                  It gets a short ID you can quote to us, which is handy when you send gifts to
+                  different people.
+                </span>
+              </span>
+            </label>
+            {saveNewAddress ? (
+              <div className="mt-3">
+                <Field label="Name this address" hint="Home, Office, Amma's place…">
+                  <Input
+                    name="saveAddressLabel"
+                    maxLength={40}
+                    placeholder={isGift ? "Gift recipient" : "Home"}
+                    value={saveAddressLabel}
+                    onChange={(event) => setSaveAddressLabel(event.target.value)}
+                  />
+                </Field>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!signedIn ? (
+          <p className="text-xs text-muted">
+            <Link href="/login?callbackUrl=/checkout" className="text-brand hover:underline">
+              Sign in
+            </Link>{" "}
+            to save this address for next time.
+          </p>
+        ) : null}
+
         <Field label="Anything we should know?" hint="Delivery date, spelling, gift note…">
-          <Textarea name="notes" />
+          <Textarea name="notes" value={values.notes} onChange={set("notes")} />
         </Field>
 
         <div>

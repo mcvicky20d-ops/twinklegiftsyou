@@ -1,7 +1,7 @@
 // TwinkleGiftsYou.in — data model
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "esm"
 }
 
@@ -61,13 +61,92 @@ enum EnquiryStatus {
 }
 
 model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  /// Absent for accounts created through Google — those sign in with the
+  /// provider instead of a password.
+  passwordHash  String?
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  role          Role      @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts  Account[]
+  sessions  Session[]
+  addresses Address[]
+  orders    Order[]
+}
+
+/// Auth.js adapter table — one row per external provider linked to a user.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+/// Auth.js adapter table. Sessions themselves are held in the signed JWT
+/// cookie, so this stays empty; the adapter still expects it to exist.
+model Session {
   id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(CUSTOMER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Auth.js adapter table, used by email sign-in links.
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/// An address book entry a signed-in customer can reuse at checkout. The
+/// short `reference` is what staff and the customer quote to each other, so a
+/// gift going to someone else can be identified without reading it aloud.
+model Address {
+  id        String @id @default(cuid())
+  reference String @unique
+  userId    String
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// "Home", "Office", "Amma's place" — how the customer recognises it.
+  label        String  @default("Home")
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+  isDefault    Boolean @default(false)
+
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, isDefault])
 }
 
 model Category {
@@ -84,30 +163,30 @@ model Category {
 }
 
 model Product {
-  id           String   @id @default(cuid())
-  title        String
-  slug         String   @unique
-  description  String
+  id                 String              @id @default(cuid())
+  title              String
+  slug               String              @unique
+  description        String
   /// Price in paise (₹499.00 => 49900) so money never touches a float.
-  price        Int
-  comparePrice Int?
-  images       String[] @default([])
-  categoryId   String
-  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  isActive     Boolean  @default(true)
-  isFeatured   Boolean  @default(false)
-  customizable Boolean  @default(true)
+  price              Int
+  comparePrice       Int?
+  images             String[]            @default([])
+  categoryId         String
+  category           Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isActive           Boolean             @default(true)
+  isFeatured         Boolean             @default(false)
+  customizable       Boolean             @default(true)
   /// Delivery charge for this item, in paise. The cart pays the highest of
   /// these once, because the shop posts one parcel rather than one per item.
-  shippingFee  Int      @default(7900)
+  shippingFee        Int                 @default(7900)
   /// Which personalisation choices this product offers. A pencil portrait is
   /// drawn from a photograph, so it has no text-only option.
   customisationModes CustomisationMode[] @default([TEXT_ONLY, IMAGE_ONLY, TEXT_AND_IMAGE])
   /// Free-text hint shown next to the customisation box, e.g. "Send the photo you want sketched".
-  customNote   String?
-  stock        Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  customNote         String?
+  stock              Int                 @default(0)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
   orderItems OrderItem[]
 
@@ -134,9 +213,29 @@ model Order {
   id          String @id @default(cuid())
   orderNumber String @unique
 
+  /// Set when the buyer was signed in. Guest checkout leaves it null.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  /// The saved address this delivery was taken from, kept so the order page
+  /// can quote its reference. The fields below stay a frozen copy, because an
+  /// address edited later must not rewrite an order already dispatched.
+  addressId        String?
+  address          Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  addressReference String?
+
+  /// The buyer.
   customerName String
   email        String
   phone        String
+
+  /// A gift goes to someone other than the buyer: the address below is the
+  /// recipient's, and the message is what we write on the card.
+  isGift         Boolean @default(false)
+  recipientName  String?
+  recipientPhone String?
+  giftMessage    String?
+
   addressLine1 String
   addressLine2 String?
   city         String
@@ -144,8 +243,8 @@ model Order {
   pincode      String
   notes        String?
 
-  subtotal Int
-  shipping Int @default(0)
+  subtotal     Int
+  shipping     Int     @default(0)
   /// Which zone was applied, kept so an old order still explains its charge
   /// after the zones are edited.
   shippingZone String?
@@ -173,6 +272,7 @@ model Order {
 
   @@index([status])
   @@index([createdAt])
+  @@index([userId, createdAt])
 }
 
 model OrderItem {

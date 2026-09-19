@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Download, MessageCircle, PhoneCall, Upload } from "lucide-react";
+import { ArrowLeft, Download, Gift, MessageCircle, PhoneCall, Upload } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { customisationLabel } from "@/lib/customisation";
@@ -208,8 +208,35 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
             </div>
           </section>
 
+          {order.isGift ? (
+            <section className="rounded-2xl border border-brand bg-blush p-5 text-sm">
+              <h2 className="flex items-center gap-2 font-display text-lg">
+                <Gift className="h-4 w-4 text-brand" /> Gift order
+              </h2>
+              <p className="mt-3">
+                <span className="text-brand-dark/70">Deliver to: </span>
+                <strong className="font-medium">{order.recipientName}</strong>
+              </p>
+              {order.recipientPhone ? (
+                <p>
+                  <a href={`tel:${order.recipientPhone}`} className="hover:underline">
+                    {order.recipientPhone}
+                  </a>
+                </p>
+              ) : null}
+              {order.giftMessage ? (
+                <p className="mt-3 rounded-xl bg-white p-3 italic">“{order.giftMessage}”</p>
+              ) : null}
+              <p className="mt-3 text-xs text-brand-dark/80">
+                Write the message on a card, and leave the invoice out of the parcel — the buyer is
+                {" "}
+                {order.customerName}, not the person receiving it.
+              </p>
+            </section>
+          ) : null}
+
           <section className="rounded-2xl border border-line bg-white p-5 text-sm">
-            <h2 className="font-display text-lg">Customer</h2>
+            <h2 className="font-display text-lg">{order.isGift ? "Buyer" : "Customer"}</h2>
             <p className="mt-3 font-medium">{order.customerName}</p>
             <p className="text-muted">
               <a href={`mailto:${order.email}`} className="hover:text-brand">
@@ -222,6 +249,12 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
               </a>
             </p>
             <p className="mt-4 text-muted">
+              {order.addressReference ? (
+                <span className="mb-1 block text-xs">
+                  Address ID <span className="font-mono">{order.addressReference}</span>
+                </span>
+              ) : null}
+              {order.isGift ? <span className="mb-1 block">{order.recipientName}</span> : null}
               {order.addressLine1}
               {order.addressLine2 ? `, ${order.addressLine2}` : ""}
               <br />

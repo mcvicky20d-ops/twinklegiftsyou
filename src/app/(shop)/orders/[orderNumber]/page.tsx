@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, Gift } from "lucide-react";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -120,12 +120,29 @@ export default async function OrderPage({
         </dl>
 
         <div className="mt-6 rounded-xl bg-cream p-4 text-sm">
-          <p className="font-medium">Delivering to</p>
+          <p className="flex items-center gap-2 font-medium">
+            {order.isGift ? <Gift className="h-4 w-4 text-brand" /> : null}
+            {order.isGift ? `Gift going to ${order.recipientName}` : "Delivering to"}
+          </p>
           <p className="mt-1 text-muted">
             {order.addressLine1}
             {order.addressLine2 ? `, ${order.addressLine2}` : ""}, {order.city}, {order.state} —{" "}
             {order.pincode}
           </p>
+          {order.recipientPhone ? (
+            <p className="text-muted">Their number: {order.recipientPhone}</p>
+          ) : null}
+          {order.addressReference ? (
+            <p className="mt-2 text-xs text-muted">
+              Address ID <span className="font-mono">{order.addressReference}</span> — quote this if
+              you message us about where the parcel goes.
+            </p>
+          ) : null}
+          {order.giftMessage ? (
+            <p className="mt-3 rounded-lg bg-white p-3 italic text-muted">
+              Card message: “{order.giftMessage}”
+            </p>
+          ) : null}
         </div>
       </div>
 

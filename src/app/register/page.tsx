@@ -2,31 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { LoginForm } from "@/components/admin/login-form";
+import { RegisterForm } from "@/components/site/register-form";
 import { GoogleButton } from "@/components/site/google-button";
 import { auth, googleEnabled } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { noIndex } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Sign in", ...noIndex };
+export const metadata: Metadata = { title: "Create an account", ...noIndex };
 
-// Whether Google is offered depends on environment variables read at request
-// time, so this page must not be frozen into the build output.
 export const dynamic = "force-dynamic";
 
 function safeCallback(value: string | undefined) {
-  // Only same-site paths, so a crafted ?callbackUrl= cannot bounce someone to
-  // another domain straight after they sign in.
   if (!value || !value.startsWith("/") || value.startsWith("//")) return "/account";
   return value;
 }
 
-export default async function LoginPage({
+export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+  searchParams: Promise<{ callbackUrl?: string }>;
 }) {
-  const { callbackUrl, error } = await searchParams;
+  const { callbackUrl } = await searchParams;
   const target = safeCallback(callbackUrl);
 
   const session = await auth();
@@ -45,18 +41,12 @@ export default async function LoginPage({
             className="h-7 w-auto"
           />
         </Link>
-        <h1 className="mt-4 text-center font-display text-2xl">Welcome back</h1>
+        <h1 className="mt-4 text-center font-display text-2xl">Create your account</h1>
         <p className="mt-1 text-center text-sm text-muted">
-          Sign in to track orders and reuse your saved addresses.
+          Save your addresses once and reorder in a couple of taps.
         </p>
 
         <div className="mt-8 space-y-5 rounded-2xl border border-line bg-white p-6">
-          {error ? (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">
-              We could not complete that sign-in. Please try again.
-            </p>
-          ) : null}
-
           {googleEnabled() ? (
             <>
               <GoogleButton callbackUrl={target} />
@@ -68,21 +58,24 @@ export default async function LoginPage({
             </>
           ) : null}
 
-          <LoginForm callbackUrl={target} />
+          <RegisterForm callbackUrl={target} />
         </div>
 
         <p className="mt-5 text-center text-sm text-muted">
-          New here?{" "}
-          <Link href={`/register?callbackUrl=${encodeURIComponent(target)}`} className="text-brand hover:underline">
-            Create an account
+          Already have an account?{" "}
+          <Link
+            href={`/login?callbackUrl=${encodeURIComponent(target)}`}
+            className="text-brand hover:underline"
+          >
+            Sign in
           </Link>
         </p>
-        <p className="mt-2 text-center text-xs text-muted">
-          You can also{" "}
-          <Link href="/checkout" className="hover:underline">
-            check out as a guest
+        <p className="mt-3 text-center text-xs text-muted">
+          By creating an account you agree to our{" "}
+          <Link href="/terms" className="hover:underline">
+            terms
           </Link>
-          .
+          . {site.domain}
         </p>
       </div>
     </div>
